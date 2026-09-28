@@ -1,0 +1,24 @@
+{
+  "id": "./",
+  "name": "RefriGuía – Técnico en aire acondicionado",
+  "short_name": "RefriGuía",
+  "description": "Tablas P-T de R22, R410A, R32 y R290, calculadoras, diagnóstico de fallas, lecciones y bitácora de servicios. Funciona sin internet.",
+  "lang": "es-MX",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b6fb8",
+  "theme_color": "#0b6fb8",
+  "categories": ["utilities", "productivity", "education"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Tabla presión-temperatura", "short_name": "Tabla P-T", "url": "./#pt", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
+    { "name": "Sobrecalentamiento", "short_name": "Sobrecalent.", "url": "./#sh", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
+    { "name": "Nuevo servicio", "short_name": "Nuevo servicio", "url": "./#editar/nuevo", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] }
+  ]
+}

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b6fb8">
+<meta name="description" content="Herramientas, tablas P-T, diagnóstico y bitácora para técnicos de aire acondicionado. Funciona sin internet.">
+<title>RefriGuía</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <button id="atras" aria-label="Regresar" class="hidden">←</button>
+  <h1 id="titulo">RefriGuía</h1>
+  <button id="btnBuscar" aria-label="Buscar">🔍</button>
+  <button id="btnAjustes" aria-label="Ajustes">⚙️</button>
+</header>
+<main id="app"></main>
+<div id="aviso" class="aviso hidden" role="status">
+  <span id="avisoTxt"></span><button id="avisoBtn"></button><button id="avisoX" class="x" aria-label="Cerrar aviso">✕</button>
+</div>
+<div id="visor" class="visor hidden" role="dialog" aria-label="Foto">
+  <img id="visorImg" alt="Foto del servicio">
+  <div class="acciones"><button class="btn sec" id="visorCompartir">📤 Compartir</button><button class="btn" id="visorCerrar">Cerrar</button></div>
+</div>
+<nav class="tabs">
+  <a href="#" data-tab="inicio"><span>🧰</span>Herramientas</a>
+  <a href="#fallas" data-tab="fallas"><span>🩺</span>Fallas</a>
+  <a href="#aprender" data-tab="aprender"><span>📘</span>Aprender</a>
+  <a href="#bitacora" data-tab="bitacora"><span>📋</span>Bitácora</a>
+</nav>
+<script src="pt.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script src="herramientas.js"></script>
+<script src="aprender.js"></script>
+<script src="bitacora.js"></script>
+</body>
+</html>
