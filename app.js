@@ -2,7 +2,7 @@
 // Las pantallas viven en herramientas.js, aprender.js y bitacora.js (se agregan a VISTAS).
 'use strict';
 
-const VERSION = '2.0';
+const VERSION = '3.0';
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const app = $('#app');
@@ -17,9 +17,16 @@ const store = {
     catch { alert('No se pudo guardar. Revisa el espacio del teléfono.'); return false; }
   },
 };
-const cfg = Object.assign({ gas: 'R410A', tu: 'C', pu: 'psi', tema: 'auto', letra: 'normal' }, store.get('cfg', {}));
+const cfg = Object.assign({ gas: 'R410A', tu: 'C', pu: 'psi', tema: 'auto', letra: 'normal', pais: 'CU', alt: 0 }, store.get('cfg', {}));
 if (!GASES.includes(cfg.gas)) cfg.gas = 'R410A';
 const saveCfg = () => store.set('cfg', cfg);
+
+// Lo que cambia según el país donde se trabaja
+const PAISES = {
+  CU: { n: 'Cuba', tel: '53', digitos: 8, volts: [110, 220], norma: 'la norma eléctrica cubana', clima: 800, hr: 75 },
+  MX: { n: 'México', tel: '52', digitos: 10, volts: [127, 220], norma: 'la NOM-001-SEDE', clima: 650, hr: 50 },
+};
+const pais = () => PAISES[cfg.pais] || PAISES.CU;
 
 // Temperaturas del lugar (se comparten entre herramientas por 3 horas)
 const amb = {
@@ -73,19 +80,24 @@ function convierte(tipo, de, a) {
 }
 
 // ---------- Tabla presión-temperatura ----------
+// PT está en psig a nivel del mar. El manómetro mide contra la presión atmosférica del lugar,
+// que baja con la altura: se corrige con la altitud de Ajustes (en Cuba casi no cambia nada).
+const ATM_MAR = 14.6959;
+const patm = (alt = cfg.alt) => ATM_MAR * Math.pow(1 - 2.25577e-5 * (+alt || 0), 5.25588);
+const dAlt = () => ATM_MAR - patm();
 function satP(gas, tC) {
   const d = PT[gas], a = d.psig, x = tC - d.tmin;
   if (!(x >= 0 && x <= a.length - 1)) return NaN;
   const i = Math.min(Math.floor(x), a.length - 2);
-  return a[i] + (a[i + 1] - a[i]) * (x - i);
+  return a[i] + (a[i + 1] - a[i]) * (x - i) + dAlt();
 }
-function satT(gas, psig) {
-  const d = PT[gas], a = d.psig;
+function satT(gas, psigLocal) {
+  const d = PT[gas], a = d.psig, psig = psigLocal - dAlt();
   if (!(psig >= a[0] && psig <= a[a.length - 1])) return NaN;
   for (let i = 0; i < a.length - 1; i++) if (psig <= a[i + 1]) return d.tmin + i + (psig - a[i]) / (a[i + 1] - a[i]);
   return NaN;
 }
-const rangoPT = gas => { const a = PT[gas].psig; return `${fmt(psiA(a[0], cfg.pu), pDec(cfg.pu))}–${fmt(psiA(a[a.length - 1], cfg.pu), pDec(cfg.pu))} ${cfg.pu}`; };
+const rangoPT = gas => { const a = PT[gas].psig, k = dAlt(); return `${fmt(psiA(a[0] + k, cfg.pu), pDec(cfg.pu))}–${fmt(psiA(a[a.length - 1] + k, cfg.pu), pDec(cfg.pu))} ${cfg.pu}`; };
 
 // Bulbo húmedo a partir de temperatura (°C) y humedad relativa (%). Fórmula de Stull (2011), error < 1 °C.
 function bulboHumedo(t, hr) {
@@ -125,7 +137,17 @@ function campo(id, label, o = {}) {
 const preAmb = k => { const v = amb.todo()[k]; return Number.isFinite(v) ? +tA(v, cfg.tu).toFixed(1) : undefined; };
 function ligarAmb(id, k) { const i = $('#' + id); i?.addEventListener('input', () => { const v = num(i.value); if (Number.isFinite(v)) amb.poner(k, aC(v, cfg.tu)); }); }
 const resultado = (cls, big, texto) => `<div class="result ${cls}"><div class="big">${big}</div>${texto ? `<div>${texto}</div>` : ''}</div>`;
+// Barra de colores con marcador. zonas: [[hasta, 'ok' | 'warn' | 'bad'], ...] empezando en "min"
+function escala(v, min, max, zonas, etiquetas = []) {
+  const pct = x => Math.max(0, Math.min(100, (x - min) / (max - min) * 100));
+  let desde = min;
+  const partes = zonas.map(([hasta, c]) => { const w = pct(hasta) - pct(desde); desde = hasta; return `<i class="z-${c}" style="flex:${w}"></i>`; }).join('');
+  return `<div class="escala"><div class="zonas">${partes}</div><b class="marca" style="left:${pct(v)}%"></b>${
+    etiquetas.map(x => `<span class="etq" style="left:${pct(x)}%">${fmt(x, 0)}</span>`).join('')}</div>`;
+}
 const val = id => num($('#' + id)?.value);
+const item = (href, icono, tono, titulo, sub = '') =>
+  `<a class="item t-${tono}" href="${href}"><span class="badge">${ico(icono)}</span><span class="grow">${titulo}${sub ? `<span class="sub">${sub}</span>` : ''}</span>${ico('chevron-right', 'chev')}</a>`;
 function onInputs(fn) { $$('input, select', app).forEach(el => el.addEventListener('input', fn)); fn(); }
 
 // Botón ± de los campos (el teclado numérico de algunos teléfonos no trae el signo menos)
@@ -199,15 +221,24 @@ const alSalir = fn => limpiezas.push(fn); // lo que hay que apagar al cambiar de
 const PADRE = {
   lista: 'listas', falla: 'fallas', leccion: 'aprender', quiz: 'aprender', glosario: 'aprender',
   servicio: 'bitacora', editar: a => (a[0] && a[0] !== 'nuevo' ? 'servicio/' + a[0] : 'bitacora'),
-  apuntes: 'bitacora', apunte: 'apuntes', precios: 'ajustes',
+  apuntes: 'bitacora', apunte: 'apuntes', precios: 'ajustes', gas: 'gases',
 };
 const TAB_DE = {
   fallas: 'fallas', falla: 'fallas',
   aprender: 'aprender', leccion: 'aprender', quiz: 'aprender', glosario: 'aprender',
   bitacora: 'bitacora', servicio: 'bitacora', editar: 'bitacora', apuntes: 'bitacora', apunte: 'bitacora',
+  gases: 'gases', gas: 'gases',
   buscar: '', ajustes: '', precios: '',
 };
-const RAICES = ['', 'fallas', 'aprender', 'bitacora'];
+const RAICES = ['', 'gases', 'fallas', 'aprender', 'bitacora'];
+
+// Barra inferior y botones del encabezado con iconos
+$('nav.tabs').innerHTML = [['', 'inicio', 'house', 'Inicio'], ['gases', 'gases', 'flask-conical', 'Gases'], ['fallas', 'fallas', 'stethoscope', 'Fallas'],
+  ['aprender', 'aprender', 'graduation-cap', 'Aprender'], ['bitacora', 'bitacora', 'clipboard-list', 'Bitácora']]
+  .map(([h, t, i, n]) => `<a href="#${h}" data-tab="${t}"><span class="pastilla">${ico(i)}</span>${n}</a>`).join('');
+$('#atras').innerHTML = ico('arrow-left');
+$('#btnBuscar').innerHTML = ico('search');
+$('#btnAjustes').innerHTML = ico('settings');
 
 // Cada entrada del historial lleva un número, para que "←" regrese igual que el botón de atrás del teléfono.
 let contador = 0;
@@ -261,6 +292,11 @@ VISTAS.ajustes = () => {
     <label>Tamaño de letra</label>${seg('letra', [['normal', 'Normal'], ['grande', 'Grande'], ['enorme', 'Muy grande']], cfg.letra)}
     <label>Colores</label>${seg('tema', [['auto', 'Automático'], ['light', 'Claro'], ['dark', 'Oscuro']], cfg.tema)}
     <p class="muted">En el sol se lee mejor en "Claro"; de noche, en "Oscuro".</p>
+    <h2>Lugar de trabajo</h2>
+    <label>País</label>${seg('pais', Object.entries(PAISES).map(([k, p]) => [k, p.n]), cfg.pais)}
+    <p class="muted">Cambia el código de WhatsApp, los voltajes y los valores de clima que se sugieren.</p>
+    <label for="alt">Altitud sobre el nivel del mar (metros)</label><input id="alt" inputmode="numeric" value="${esc(cfg.alt)}">
+    <p class="muted" id="altNota"></p>
     <h2>Unidades</h2>
     <label>Presión</label>${puSeg()}
     <label>Temperatura</label>${tuSeg()}
@@ -269,21 +305,31 @@ VISTAS.ajustes = () => {
     <label for="pNombre">Nombre o negocio</label><input id="pNombre" value="${esc(perfil.nombre)}" autocomplete="off" placeholder="Ej. Refrigeración Hernández">
     <label for="pTel">Teléfono</label><input id="pTel" type="tel" value="${esc(perfil.tel)}">
     <label for="pPie">Texto al final de la nota</label><textarea id="pPie" placeholder="Ej. Garantía de 30 días en mano de obra.">${esc(perfil.pie)}</textarea>
-    <a class="item" href="#precios"><span class="ico">💲</span><span class="grow">Mis precios<span class="sub">Conceptos que cobras seguido, para armar notas rápido</span></span>›</a>
+    ${item('#precios', 'banknote', 'verde', 'Mis precios', 'Conceptos que cobras seguido, para armar notas rápido')}
     <h2>Respaldo</h2>
     <p class="muted">La bitácora, los apuntes y las fotos se guardan sólo en este teléfono. Guarda un respaldo de vez en cuando y mándatelo por WhatsApp o correo.</p>
     <label class="chk"><input type="checkbox" id="conFotos" checked><span>Incluir fotos (el archivo sale más grande)</span></label>
-    <div class="row"><button class="btn sec" id="exp">⬇ Guardar respaldo</button><button class="btn sec" id="imp">⬆ Cargar respaldo</button></div>
+    <div class="row"><button class="btn sec" id="exp">${ico('download')} Guardar</button><button class="btn sec" id="imp">${ico('upload')} Cargar</button></div>
     <input type="file" id="archivo" accept=".json,application/json" class="hidden">
     <p class="muted" id="espacio"></p>
     <h2>Acerca de</h2>
     <p>RefriGuía versión ${VERSION}. Funciona sin internet.</p>
     <p class="muted">Tablas P-T calculadas con CoolProp. Los demás valores son orientativos: manda la placa y el manual del fabricante.</p>
-    <button class="btn sec" id="compartirApp">📤 Compartir la app con otro técnico</button>`;
+    <button class="btn sec" id="compartirApp">${ico('share-2')} Compartir la app con otro técnico</button>`;
+
   bindSeg('letra', v => { cfg.letra = v; saveCfg(); aplicaLetra(); });
   bindSeg('tema', v => { cfg.tema = v; saveCfg(); aplicaTema(); });
   bindSeg('pu', v => { cfg.pu = v; saveCfg(); });
   bindSeg('tu', v => { cfg.tu = v; saveCfg(); });
+  bindSeg('pais', v => { cfg.pais = v; saveCfg(); });
+  const notaAlt = () => {
+    const d = dAlt();
+    $('#altNota').textContent = Math.abs(d) < 0.25
+      ? `A esta altura el manómetro lee prácticamente igual que a nivel del mar (diferencia de ${fmt(d, 2)} psi). No hace falta corregir nada.`
+      : `A esta altura el aire pesa menos: el manómetro marca ${fmt(d, 1)} psi más que a nivel del mar para la misma temperatura. La app ya lo corrige en todas las tablas y cálculos.`;
+  };
+  $('#alt').addEventListener('input', () => { const v = num($('#alt').value); cfg.alt = Number.isFinite(v) ? Math.max(0, Math.min(5000, v)) : 0; saveCfg(); notaAlt(); });
+  notaAlt();
   const guardaPerfil = () => store.set('perfil', { nombre: $('#pNombre').value.trim(), tel: $('#pTel').value.trim(), pie: $('#pPie').value.trim() });
   ['pNombre', 'pTel', 'pPie'].forEach(id => $('#' + id).addEventListener('input', guardaPerfil));
   $('#exp').onclick = () => exportar($('#conFotos').checked);
@@ -322,15 +368,17 @@ VISTAS.buscar = () => {
     const coincide = s => { const n = norm(s); return palabras.every(w => n.includes(w)); };
     const grupos = [];
     const hs = SECCIONES.flatMap(s => s.items).filter(h => coincide(h.t + ' ' + h.k));
-    if (hs.length) grupos.push(['Herramientas', hs.map(h => `<a class="item" href="#${h.r}"><span class="ico">${h.i}</span><span class="grow">${h.t}</span>›</a>`)]);
+    if (hs.length) grupos.push(['Herramientas', hs.map(itemHerramienta)]);
+    const gs0 = GASES_INFO.filter(g => coincide([g.nombre, g.apodo, g.quimico, g.familia, g.seguridadTxt, g.usos, ...g.claves].join(' ')));
+    if (gs0.length) grupos.push(['Gases', gs0.map(itemGas)]);
     const ls = LECCIONES.map(l => ({ l, txt: textoPlano(l.html) })).filter(x => coincide(x.l.titulo + ' ' + x.txt));
-    if (ls.length) grupos.push(['Lecciones', ls.map(({ l, txt }) => `<a class="item" href="#leccion/${l.id}"><span class="ico">${l.icono}</span><span class="grow">${l.titulo}<span class="sub">${fragmento(txt, palabras)}</span></span>›</a>`)]);
+    if (ls.length) grupos.push(['Lecciones', ls.map(({ l, txt }) => item(`#leccion/${l.id}`, l.icono, 'morado', l.titulo, fragmento(txt, palabras)))]);
     const fs = FALLAS.map((f, i) => ({ f, i, txt: [f.t, ...f.causas, ...f.revisar].join('. ') })).filter(x => coincide(x.txt));
-    if (fs.length) grupos.push(['Fallas', fs.map(({ f, i, txt }) => `<a class="item" href="#falla/${i}"><span class="grow">${esc(f.t)}<span class="sub">${fragmento(txt, palabras)}</span></span>›</a>`)]);
+    if (fs.length) grupos.push(['Fallas', fs.map(({ f, i, txt }) => item(`#falla/${i}`, 'stethoscope', 'rojo', esc(f.t), fragmento(txt, palabras)))]);
     const gs = GLOSARIO.filter(([en, es]) => coincide(en + ' ' + es)).slice(0, 12);
     if (gs.length) grupos.push(['Glosario', gs.map(([en, es]) => `<div class="glosa"><b>${esc(en)}</b><div>${esc(es)}</div></div>`)]);
     const as = store.get('apuntes', []).filter(a => coincide(a.titulo + ' ' + a.texto)).slice(0, 15);
-    if (as.length) grupos.push(['Mis apuntes', as.map(a => `<a class="item" href="#apunte/${a.id}"><span class="grow">${esc(a.titulo || 'Sin título')}<span class="sub">${fragmento(a.texto || '', palabras)}</span></span>›</a>`)]);
+    if (as.length) grupos.push(['Mis apuntes', as.map(a => item(`#apunte/${a.id}`, 'notebook-pen', 'ambar', esc(a.titulo || 'Sin título'), fragmento(a.texto || '', palabras)))]);
     const ss = store.get('servicios', []).filter(s => coincide([s.cliente, s.tel, s.direccion, s.marca, s.modelo, s.tipo, s.notas, s.gas].join(' ')))
       .sort((a, b) => (b.fecha || '').localeCompare(a.fecha || '')).slice(0, 20);
     if (ss.length) grupos.push(['Servicios', ss.map(s => filaServicio(s))]);

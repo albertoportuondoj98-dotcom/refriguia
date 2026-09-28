@@ -3,41 +3,61 @@
 
 const SECCIONES = [
   { t: 'Medir y calcular', items: [
-    { r: 'pt', i: '📊', t: 'Tabla presión-temperatura', k: 'presion temperatura saturacion psi bar kpa tabla pt' },
-    { r: 'sh', i: '🌡️', t: 'Sobrecalentamiento y subenfriamiento', k: 'sh sc superheat subcooling carga objetivo bulbo humedo' },
-    { r: 'diag', i: '🧭', t: 'Diagnóstico por presiones', k: 'diagnostico presiones baja alta falla esperada' },
-    { r: 'dt', i: '🌬️', t: 'Temperatura del aire (ΔT)', k: 'delta aire retorno inyeccion salida diferencia enfria poco' },
-    { r: 'carga', i: '⚖️', t: 'Carga por metro extra', k: 'carga gas gramos metro tuberia adicional precarga' },
+    { r: 'pt', i: 'table', c: 'azul', t: 'Tabla presión-temperatura', k: 'presion temperatura saturacion psi bar kpa tabla pt' },
+    { r: 'sh', i: 'thermometer', c: 'rojo', t: 'Sobre00adcalenta00admiento y sub00adenfria00admiento', k: 'sh sc superheat subcooling carga objetivo bulbo humedo' },
+    { r: 'diag', i: 'gauge', c: 'morado', t: 'Diagnóstico por presiones', k: 'diagnostico presiones baja alta falla esperada' },
+    { r: 'dt', i: 'wind', c: 'cian', t: 'Temperatura del aire (ΔT)', k: 'delta aire retorno inyeccion salida diferencia enfria poco' },
+    { r: 'carga', i: 'scale', c: 'verde', t: 'Carga por metro extra', k: 'carga gas gramos metro tuberia adicional precarga' },
   ] },
   { t: 'Eléctrico', items: [
-    { r: 'cap', i: '🔋', t: 'Capacitores', k: 'capacitor microfaradios uf herm fan' },
-    { r: 'comp', i: '🔌', t: 'Terminales del compresor', k: 'compresor devanado ohm comun arranque marcha csr uvw inverter' },
-    { r: 'sensor', i: '🧪', t: 'Sensores (termistores)', k: 'termistor sensor ntc kohm resistencia temperatura' },
-    { r: 'cable', i: '🧵', t: 'Cable y breaker', k: 'cable calibre awg breaker pastilla interruptor mca mop tierra caida voltaje' },
+    { r: 'cap', i: 'zap', c: 'ambar', t: 'Capacitores', k: 'capacitor microfaradios uf herm fan' },
+    { r: 'comp', i: 'plug', c: 'naranja', t: 'Terminales del compresor', k: 'compresor devanado ohm comun arranque marcha csr uvw inverter' },
+    { r: 'sensor', i: 'microchip', c: 'morado', t: 'Sensores (termistores)', k: 'termistor sensor ntc kohm resistencia temperatura' },
+    { r: 'cable', i: 'cable', c: 'gris', t: 'Cable y breaker', k: 'cable calibre awg breaker pastilla interruptor mca mop tierra caida voltaje' },
   ] },
   { t: 'Instalación', items: [
-    { r: 'vacio', i: '🌀', t: 'Vacío y cronómetro', k: 'vacio micrones bomba prueba retencion cronometro' },
-    { r: 'nivel', i: '📏', t: 'Nivel', k: 'nivel burbuja evaporadora placa inclinacion ventana' },
-    { r: 'btu', i: '🏠', t: 'Cálculo de BTU del cuarto', k: 'btu toneladas cuarto area m2 tamaño equipo' },
-    { r: 'tablas', i: '📐', t: 'Torque, tuberías y presiones', k: 'torque flare tuberia diametro presiones referencia' },
-    { r: 'listas', i: '✅', t: 'Listas de revisión', k: 'checklist lista instalacion mantenimiento seguridad pump down desinstalar' },
+    { r: 'vacio', i: 'timer', c: 'cian', t: 'Vacío y cronómetro', k: 'vacio micrones bomba prueba retencion cronometro' },
+    { r: 'nivel', i: 'ruler', c: 'verde', t: 'Nivel', k: 'nivel burbuja evaporadora placa inclinacion ventana' },
+    { r: 'btu', i: 'house-plus', c: 'naranja', t: 'Cálculo de BTU del cuarto', k: 'btu toneladas cuarto area m2 tamaño equipo' },
+    { r: 'tablas', i: 'wrench', c: 'gris', t: 'Torque, tuberías y presiones', k: 'torque flare tuberia diametro presiones referencia' },
+    { r: 'listas', i: 'list-checks', c: 'verde', t: 'Listas de revisión', k: 'checklist lista instalacion mantenimiento seguridad pump down desinstalar' },
   ] },
   { t: 'Otros', items: [
-    { r: 'conv', i: '🔁', t: 'Conversiones', k: 'convertir unidades btu kw psi bar libras kilos pies' },
-    { r: 'glosario', i: '🔤', t: 'Glosario inglés-español', k: 'ingles traduccion palabras manual placa codigo' },
+    { r: 'conv', i: 'arrow-left-right', c: 'azul', t: 'Conversiones', k: 'convertir unidades btu kw psi bar libras kilos pies' },
+    { r: 'glosario', i: 'languages', c: 'rosa', t: 'Glosario inglés-español', k: 'ingles traduccion palabras manual placa codigo' },
   ] },
 ];
 const HERRAMIENTA = r => SECCIONES.flatMap(s => s.items).find(h => h.r === r);
+const itemHerramienta = h => item(`#${h.r}`, h.i, h.c, h.t);
 
 VISTAS[''] = () => {
-  app.innerHTML = SECCIONES.map(s => `<h2 class="seccion">${s.t}</h2><div class="grid">${
-    s.items.map(h => `<a class="tile" href="#${h.r}"><span>${h.i}</span>${h.t}</a>`).join('')}</div>`).join('') +
-    `<p class="muted" style="margin-top:1rem">Los valores son orientativos. Siempre manda la placa y el manual del fabricante.</p>`;
+  const hora = new Date().getHours();
+  const saludo = hora < 12 ? 'Buenos días' : hora < 19 ? 'Buenas tardes' : 'Buenas noches';
+  const v = vacio.estado();
+  const vacioActivo = v && !v.avisado && Date.now() < v.fin;
+  app.innerHTML = `<section class="hero">
+      <svg class="copo" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${ICONOS.snowflake}</svg>
+      <h2>${saludo}</h2>
+      <p>Tu apoyo para aires de ventana y splits</p>
+      <button class="hero-buscar" id="irBuscar">${ico('search')} Buscar gas, falla, herramienta…</button>
+      <div class="rapidos">
+        <a href="#pt">${ico('table')}Tabla P-T</a>
+        <a href="#diag">${ico('gauge')}Diagnóstico</a>
+        <a href="#editar/nuevo">${ico('plus')}Nuevo servicio</a>
+      </div>
+    </section>
+    ${vacioActivo ? `<a class="item t-cian" href="#vacio"><span class="badge">${ico('timer')}</span><span class="grow">Prueba de vacío corriendo<span class="sub">Toca para ver el cronómetro</span></span>${ico('chevron-right', 'chev')}</a>` : ''}
+    <h2 class="seccion">Gases</h2>
+    <div class="gases-grid">${GASES_INFO.map(tarjetaGas).join('')}</div>
+    ${SECCIONES.map(s => `<h2 class="seccion">${s.t}</h2><div class="grid">${
+      s.items.map(h => `<a class="tile t-${h.c}" href="#${h.r}"><span class="badge">${ico(h.i)}</span>${h.t}</a>`).join('')}</div>`).join('')}
+    <p class="muted" style="margin-top:1.25rem;text-align:center">Valores orientativos: siempre manda la placa y el manual del fabricante.</p>`;
+  $('#irBuscar').onclick = () => ir('buscar');
   return 'RefriGuía';
 };
 
 const notaInflamable = gas => gas === 'R290'
-  ? '<div class="alerta">🔥 R290 (propano) es A3: <b>muy inflamable</b>. Nada de flama ni chispas, herramienta para A3 y nunca soldar con gas.</div>'
+  ? '<div class="alerta">R290 (propano) es A3: <b>muy inflamable</b>. Nada de flama ni chispas, herramienta para A3 y nunca soldar con gas.</div>'
   : gas === 'R32' ? '<div class="nota">R32 es A2L (levemente inflamable). Repasa la lección de seguridad antes de soldar o recuperar.</div>' : '';
 
 // ---------- Tabla P-T ----------
@@ -129,7 +149,7 @@ VISTAS.sh = () => {
       : campo('p', `Presión de alta (línea de líquido) en ${UP}`, { tipo: 'p' }) + campo('t', `Temperatura del tubo de líquido en ${UT}`, { tipo: 't' });
     $('#objetivo').innerHTML = tipo === 'sh' ? `<div class="card"><h3>SH objetivo (equipos con capilar)</h3>
         <p class="muted">Con la temperatura y la humedad del cuarto y la temperatura de afuera te dice cuánto sobrecalentamiento debe tener. No sirve para inverter con válvula electrónica: esos se cargan por peso.</p>
-        <div class="row"><div>${campo('tc', `Aire del cuarto ${UT}`, { tipo: 't', valor: preAmb('tc') })}</div><div>${campo('hr', 'Humedad del cuarto %', { valor: store.get('hr', 50), modo: 'numeric' })}</div></div>
+        <div class="row"><div>${campo('tc', `Aire del cuarto ${UT}`, { tipo: 't', valor: preAmb('tc') })}</div><div>${campo('hr', 'Humedad del cuarto %', { valor: store.get('hr', pais().hr), modo: 'numeric' })}</div></div>
         ${campo('te', `Aire de afuera ${UT}`, { tipo: 't', neg: true, valor: preAmb('te') })}
         <p class="muted">Si no tienes medidor de humedad: clima seco 30%, normal 50%, costa o muy húmedo 70%.</p>
         <div id="resObj"></div></div>` : '';
@@ -165,8 +185,11 @@ VISTAS.sh = () => {
           else if (dc <= 8) [cls, txt] = ['ok', 'Normal. Compara con lo que pide el fabricante (muchos piden 3–6 °C).'];
           else [cls, txt] = ['warn', 'Alto: posible exceso de gas o restricción (si además la succión está baja).'];
         }
+        const barra = tipo === 'sh'
+          ? escala(dc, 0, 16, [[3, 'bad'], [8, 'ok'], [12, 'warn'], [16, 'bad']], [0, 3, 8, 12, 16])
+          : escala(dc, 0, 12, [[2, 'warn'], [8, 'ok'], [12, 'warn']], [0, 2, 8, 12]);
         $('#res').innerHTML = resultado(cls, `${tipo === 'sh' ? 'SH' : 'SC'} = ${fmt(dA(dc, cfg.tu))} ${tU(cfg.tu)}`,
-          `Saturación: ${fmt(tA(ts, cfg.tu))} ${tU(cfg.tu)} · ${cfg.tu === 'C' ? `(${fmt(dc * 1.8)} °F)` : `(${fmt(dc)} °C)`}<br><b>${txt}</b>`);
+          `${barra}Saturación: ${fmt(tA(ts, cfg.tu))} ${tU(cfg.tu)} · ${cfg.tu === 'C' ? `(${fmt(dc * 1.8)} °F)` : `(${fmt(dc)} °C)`}<br><b>${txt}</b>`);
       }
     }
     if (tipo !== 'sh') return;
@@ -314,7 +337,8 @@ VISTAS.dt = () => {
     else if (d <= 12) [cls, txt] = ['ok', 'Normal.'];
     else if (d <= 14) [cls, txt] = ['warn', 'Algo alta: revisa filtros, turbina y velocidad del ventilador.'];
     else [cls, txt] = ['bad', 'Muy alta: pasa muy poco aire. Lava filtros y turbina; riesgo de congelamiento.'];
-    $('#res').innerHTML = resultado(cls, `ΔT = ${fmt(dA(d, cfg.tu))} ${tU(cfg.tu)}`, `<b>${txt}</b>`);
+    $('#res').innerHTML = resultado(cls, `ΔT = ${fmt(dA(d, cfg.tu))} ${tU(cfg.tu)}`,
+      `${escala(d, 0, 18, [[6, 'bad'], [8, 'warn'], [12, 'ok'], [14, 'warn'], [18, 'bad']], [0, 6, 8, 12, 14, 18])}<b>${txt}</b>`);
   };
   bindUnidades(calc);
   ligarAmb('ret', 'tc');
@@ -331,7 +355,7 @@ VISTAS.carga = () => {
     <div class="row"><div>${campo('lt', 'Tubería total (m)', { ph: 'Ej. 8' })}</div><div>${campo('lp', 'Precargada (m)', { valor: 5 })}</div></div>
     ${campo('gm', 'Gramos por metro extra')}
     <div id="res"></div>
-    <div class="nota">La placa o el manual dicen cuántos metros trae precargados y cuántos gramos por metro extra. Si no lo encuentras, el valor sugerido es el típico de marcas comunes (Midea, Mirage y parecidas).</div>
+    <div class="nota">La placa o el manual dicen cuántos metros trae precargados y cuántos gramos por metro extra. Si no lo encuentras, el valor sugerido es el típico de marcas comunes (Midea, Gree y parecidas).</div>
     <p class="muted">1 pie = 0.3048 m. Si la tubería es más corta que la precarga, no se le quita gas.</p>`;
   const sugerido = () => { $('#gm').value = GRAMOS_METRO[diam][gas]; };
   const calc = () => {
@@ -466,16 +490,18 @@ const BREAKERS = [15, 20, 25, 30, 35, 40, 45, 50, 60];
 
 VISTAS.cable = () => {
   let volt = store.get('cable_v', 220);
+  const volts = pais().volts;
+  if (!volts.includes(volt) && volt !== 220) volt = 220;
   app.innerHTML = `<p class="muted">Busca en la placa de la condensadora o del equipo de ventana: <b>MCA</b> (Min. Circuit Ampacity) y <b>MOP</b> o <b>MOCP</b> (Max. Overcurrent Protection).</p>
     <div class="row"><div>${campo('mca', 'MCA (A)')}</div><div>${campo('mop', 'MOP (A)')}</div></div>
     <details><summary>¿La placa no trae MCA?</summary>
       <p class="muted">MCA = 1.25 × RLA del compresor + FLA de los ventiladores.</p>
       <div class="row"><div>${campo('rla', 'RLA (A)')}</div><div>${campo('fla', 'FLA (A)')}</div></div>
     </details>
-    <label>Voltaje</label>${seg('volt', [[127, '127 V'], [220, '220 V']], volt)}
+    <label>Voltaje</label>${seg('volt', volts.map(v => [v, v + ' V']), volt)}
     ${campo('dist', 'Distancia del tablero al equipo (m)', { ph: 'Ej. 15' })}
     <div id="res"></div>
-    <div class="nota">Cable de cobre THW o THHN, con la capacidad de la columna de 60 °C (NOM-001-SEDE). Si el manual del equipo pide otra cosa, manda el manual.</div>`;
+    <div class="nota">Cable de cobre THW o THHN, con la capacidad de la columna de 60 °C. Revisa también ${pais().norma}. Si el manual del equipo pide otra cosa, manda el manual.</div>`;
   const calc = () => {
     let mca = val('mca'), calculado = false;
     if (!Number.isFinite(mca)) {
@@ -560,7 +586,7 @@ VISTAS.vacio = () => {
     <li>Sube y se estabiliza alto: <b>humedad</b>. Sigue haciendo vacío.</li>
     <li>Sube y sigue subiendo sin parar: <b>fuga</b>. Presuriza con nitrógeno y busca.</li></ul>`;
   const pinta = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); $('#reloj').textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };
-  const boton = () => { const c = vacio.estado(); $('#go').textContent = c && !c.avisado && Date.now() < c.fin ? '■ Detener' : terminado ? '↻ Nueva prueba' : '▶ Iniciar prueba'; };
+  const boton = () => { const c = vacio.estado(); $('#go').innerHTML = c && !c.avisado && Date.now() < c.fin ? `${ico('x')} Detener` : terminado ? `${ico('refresh-cw')} Nueva prueba` : `${ico('timer')} Iniciar prueba`; };
   const calc = () => {
     const i = val('ini'), f = val('fin');
     if (!Number.isFinite(f)) { $('#res').innerHTML = ''; return; }
@@ -597,7 +623,7 @@ VISTAS.nivel = () => {
     <p class="muted" style="text-align:center" id="mm"></p>
     <div id="sinSensor" class="alerta hidden">No se detecta el sensor de movimiento. Esta herramienta necesita abrir la app en el teléfono.</div>
     <button class="btn sec hidden" id="permiso">Permitir el sensor</button>
-    <div class="row"><button class="btn sec" id="cal">🎯 Calibrar</button><button class="btn sec" id="quitarCal">Quitar calibración</button></div>
+    <div class="row"><button class="btn sec" id="cal">${ico('check')} Calibrar</button><button class="btn sec" id="quitarCal">Quitar calibración</button></div>
     <div class="nota">Apoya el canto del teléfono sobre la placa de montaje, o acuéstalo sobre la evaporadora. La evaporadora va nivelada o con una caída ligera hacia el lado del drenaje. El equipo de ventana va unos 6 mm más bajo hacia afuera.</div>
     <p class="muted">Para calibrar, pon el teléfono sobre una superficie que sepas que está nivelada y toca "Calibrar".</p>`;
   let g = null, modo = null, crudo = null;
@@ -666,7 +692,7 @@ VISTAS.nivel = () => {
 
 // ---------- Cálculo de BTU ----------
 VISTAS.btu = () => {
-  let clima = 650, sol = 1;
+  let clima = pais().clima, sol = 1;
   app.innerHTML = `<div class="row"><div>${campo('largo', 'Largo (m)')}</div><div>${campo('ancho', 'Ancho (m)')}</div></div>
     <div class="row"><div>${campo('alto', 'Altura (m)', { valor: 2.5 })}</div><div>${campo('pers', 'Personas', { valor: 2, modo: 'numeric' })}</div></div>
     <label>Clima</label>${seg('clima', [[450, 'Templado'], [650, 'Caluroso'], [800, 'Muy caluroso / costa']], clima)}
@@ -735,7 +761,7 @@ VISTAS.tablas = () => {
     <h2>Torque de tuercas flare</h2>
     <div class="card"><table><tr><th>Tubo</th><th>N·m</th><th>lb·pie</th></tr>${TORQUE.map(r => `<tr><td><b>${r.tubo}</b></td><td>${r.nm}</td><td>${r.ftlb}</td></tr>`).join('')}</table>
     <p class="muted">Valores típicos de fabricantes. Si el manual trae otro, manda el manual.</p></div>
-    <h2>Tubería de minisplit</h2>
+    <h2>Tubería de split (minisplit)</h2>
     <div class="card"><table><tr><th>Capacidad</th><th>Líquido</th><th>Gas</th></tr>${TUBERIA.map(r => `<tr><td>${r.cap}</td><td>${r.liq}</td><td>${r.gas}</td></tr>`).join('')}</table>
     <p class="muted">Diámetros más comunes. Cada marca puede variar: confirma con las válvulas de la condensadora.</p></div>
     <h2>Cable de cobre (60 °C)</h2>
@@ -756,7 +782,8 @@ VISTAS.tablas = () => {
 VISTAS.listas = () => {
   app.innerHTML = LISTAS.map(l => {
     const hechos = store.get('lista_' + l.id, []).length;
-    return `<a class="item" href="#lista/${l.id}"><span class="ico">✅</span><span class="grow">${l.t}<span class="sub">${hechos} de ${l.items.length} marcados</span></span>›</a>`;
+    return item(`#lista/${l.id}`, 'list-checks', 'verde', l.t, `${hechos} de ${l.items.length} marcados`);
+
   }).join('');
   return 'Listas de revisión';
 };

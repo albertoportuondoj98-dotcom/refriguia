@@ -3,7 +3,7 @@
 App para técnico de aire acondicionado (ventana y minisplit hasta 3 TR; R22, R410A, R32 y R290).
 Funciona sin internet una vez instalada en el teléfono.
 
-## Qué trae (versión 2.0)
+## Qué trae (versión 3.0)
 - **Herramientas:** tabla P-T, sobrecalentamiento/subenfriamiento con SH objetivo (capilar),
   diagnóstico por presiones con temperaturas reales, ΔT de aire, carga por metro extra,
   capacitores, terminales C-S-R / U-V-W, sensores NTC, cable y breaker (MCA/MOP),
@@ -13,7 +13,8 @@ Funciona sin internet una vez instalada en el teléfono.
   pregunta del día y glosario inglés-español.
 - **Bitácora:** servicios con fotos, cobro por conceptos, lista de precios, nota y recordatorio
   por WhatsApp, historial por cliente, resumen del mes, borrador automático y respaldo con fotos.
-- **Ajustes:** tamaño de letra, tema, unidades, datos del técnico para las notas.
+- **Gases:** fichas de R22, R410A, R32 y R290 (datos, presiones, carga, aceite, seguridad, tabla P-T rápida), comparación y otros gases.
+- **Ajustes:** país (Cuba o México: WhatsApp, voltajes, clima), altitud (corrige las tablas P-T), tamaño de letra, tema, unidades y datos del técnico.
 
 ## Archivos
 - `index.html`, `styles.css`
@@ -41,3 +42,5 @@ y volver a publicar. Cuando el teléfono abra la app con internet, sale el aviso
 ## Datos
 Todo se guarda sólo en el teléfono (localStorage y, las fotos, IndexedDB).
 Usar "Guardar respaldo" (Ajustes o Bitácora) de vez en cuando; la app lo recuerda cada mes.
+
+Iconos: [Lucide](https://lucide.dev), licencia ISC.

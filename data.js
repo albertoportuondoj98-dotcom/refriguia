@@ -2,7 +2,7 @@
 // Los valores son orientativos; siempre manda la placa y el manual del fabricante.
 
 const LECCIONES = [
-{ id: 'ciclo', icono: '🔄', titulo: 'El ciclo de refrigeración', html: `
+{ id: 'ciclo', icono: 'refresh-cw', titulo: 'El ciclo de refrigeración', html: `
 <p>Todo equipo de aire acondicionado mueve calor de adentro hacia afuera con cuatro piezas:</p>
 <ol>
 <li><b>Compresor:</b> jala vapor frío a baja presión y lo aprieta. Sale vapor muy caliente a alta presión (descarga).</li>
@@ -23,7 +23,7 @@ const LECCIONES = [
 <li>Usa tubo capilar. Si se tapa el capilar o el filtro, la baja se va al piso y la alta sube.</li>
 </ul>` },
 
-{ id: 'shsc', icono: '🌡️', titulo: 'Sobrecalentamiento y subenfriamiento', html: `
+{ id: 'shsc', icono: 'thermometer', titulo: 'Sobrecalentamiento y subenfriamiento', html: `
 <p>Son las dos medidas que te dicen si la carga de gas está bien, mucho mejor que sólo ver la presión.</p>
 <h3>Sobrecalentamiento (SH)</h3>
 <p>Cuántos grados se calentó el vapor <b>después</b> de terminar de hervir.</p>
@@ -49,11 +49,11 @@ const LECCIONES = [
 <p>El SH correcto cambia con el clima: con calor y cuarto seco se necesita menos, y con cuarto húmedo y fresco afuera, más. En <b>Herramientas → Sobrecalentamiento</b> puedes calcular el SH objetivo con la temperatura y humedad del cuarto y la temperatura de afuera (sólo para equipos con capilar).</p>
 <div class="nota">⚠️ En inverter mide con el equipo en modo prueba o frío a 16 °C con ventilador alto, después de 10–15 min. Si el compresor está a baja velocidad las lecturas engañan.</div>` },
 
-{ id: 'placa', icono: '🏷️', titulo: 'Cómo leer la placa de datos', html: `
+{ id: 'placa', icono: 'info', titulo: 'Cómo leer la placa de datos', html: `
 <p>La placa (etiqueta) de la condensadora o del equipo de ventana trae casi todo lo que necesitas. Tómale foto y guárdala en la bitácora.</p>
 <table>
 <tr><td><b>Model</b></td><td>Modelo. En minisplit hay uno para la unidad interior y otro para la exterior.</td></tr>
-<tr><td><b>Power supply</b></td><td>Voltaje, fases y frecuencia. Ej. 220 V ~ 1 fase 60 Hz, o 127 V.</td></tr>
+<tr><td><b>Power supply</b></td><td>Voltaje, fases y frecuencia. Ej. 220 V ~ 1 fase 60 Hz, o 110–127 V.</td></tr>
 <tr><td><b>Cooling capacity</b></td><td>Capacidad en BTU/h o en W. 3 517 W = 12 000 BTU/h = 1 tonelada.</td></tr>
 <tr><td><b>Rated current / Input</b></td><td>Corriente (A) y potencia (W) de trabajo normal.</td></tr>
 <tr><td><b>RLA</b></td><td>Amperaje nominal del compresor. Trabajando normalmente marca menos.</td></tr>
@@ -64,9 +64,9 @@ const LECCIONES = [
 <tr><td><b>Refrigerant / Charge</b></td><td>Tipo de gas y carga de fábrica (g, kg u oz). En minisplit es para cierta longitud de tubería.</td></tr>
 <tr><td><b>Design pressure</b></td><td>Presión de diseño (alta y baja). Nunca la rebases, ni en la prueba con nitrógeno.</td></tr>
 </table>
-<div class="nota">La herramienta <b>Cable y breaker</b> usa el MCA y el MOP de la placa. La etiqueta amarilla de eficiencia energética dice qué tan ahorrador es: número más alto = gasta menos luz.</div>` },
+<div class="nota">La herramienta <b>Cable y breaker</b> usa el MCA y el MOP de la placa. La etiqueta de eficiencia energética dice qué tan ahorrador es: número más alto (EER o SEER) = gasta menos corriente.</div>` },
 
-{ id: 'herramientas', icono: '🧰', titulo: 'Herramientas de medición', html: `
+{ id: 'herramientas', icono: 'wrench', titulo: 'Herramientas de medición', html: `
 <ul>
 <li><b>Manómetros (manifold):</b> analógicos o digitales. Los digitales ya traen las tablas P-T y calculan el sobrecalentamiento. Revisa que sirvan para tu gas: R410A y R32 ocupan escala de alta presión.</li>
 <li><b>Vacuómetro de micrones:</b> es la única forma de saber si el vacío está bien.</li>
@@ -81,7 +81,31 @@ const LECCIONES = [
 </ul>
 <div class="nota">Revisa tus instrumentos de vez en cuando: los manómetros deben marcar cero sin presión, y el termómetro debe marcar 0 °C en un vaso con agua y mucho hielo.</div>` },
 
-{ id: 'r22', icono: '🟢', titulo: 'R22: lo que hay que saber', html: `
+{ id: 'componentes', icono: 'cpu', titulo: 'Componentes de un split y de un equipo de ventana', html: `
+<h3>Unidad exterior (condensadora)</h3>
+<ul>
+<li><b>Compresor:</b> el corazón del equipo. Convencional (monofásico C-S-R, con capacitor) o inverter (trifásico U-V-W, movido por la tarjeta). Tipos comunes: rotativo en splits y ventana; scroll en equipos más grandes.</li>
+<li><b>Condensador:</b> serpentín de cobre con aletas de aluminio. Si está sucio, sube la alta y el equipo gasta más corriente.</li>
+<li><b>Motor ventilador y aspa:</b> sacan el calor del condensador. En inverter suelen ser motores DC.</li>
+<li><b>Capacitor:</b> ayuda a arrancar y a mantener trabajando el compresor y el ventilador (sólo en convencionales).</li>
+<li><b>Contactor o relé:</b> conecta el compresor cuando la unidad interior lo pide.</li>
+<li><b>Válvulas de servicio:</b> una para el tubo de líquido y otra para el de gas. La de gas trae el pivote para el manómetro.</li>
+<li><b>Válvula de 4 vías:</b> sólo en frío-calor. Invierte el ciclo.</li>
+<li><b>Tubo capilar o EEV:</b> baja la presión antes del evaporador. En muchos splits está en la condensadora.</li>
+<li><b>Tarjeta exterior (inverter):</b> con el módulo IPM que mueve el compresor, capacitores grandes y sensores de descarga, tubería y aire exterior.</li>
+</ul>
+<h3>Unidad interior (evaporadora)</h3>
+<ul>
+<li><b>Evaporador:</b> serpentín donde el gas hierve y enfría el aire.</li>
+<li><b>Turbina (blower):</b> mueve el aire del cuarto. Junta mugre y hongos: lávala en cada mantenimiento.</li>
+<li><b>Filtros, charola y drenaje:</b> si se tapan, el equipo gotea o se congela.</li>
+<li><b>Tarjeta interior:</b> recibe la señal del control, lee los sensores del cuarto y del serpentín, y manda a la exterior.</li>
+<li><b>Motor de aletas (swing):</b> mueve las aletas que dirigen el aire.</li>
+</ul>
+<h3>Equipo de ventana</h3>
+<p>Tiene todo lo anterior en una sola caja, con un motor de doble flecha que mueve la turbina y el aspa, termostato (mecánico o sensor), selector y capacitor doble.</p>` },
+
+{ id: 'r22', icono: 'flask-conical', titulo: 'R22: lo que hay que saber', html: `
 <ul>
 <li><b>Tipo:</b> HCFC, sustancia pura. Daña la capa de ozono.</li>
 <li><b>Situación:</b> por el Protocolo de Montreal su producción e importación se está eliminando. Cada vez hay menos y sale más caro. Lo que se recupera se debe limpiar y reutilizar, nunca tirarlo al aire.</li>
@@ -97,7 +121,7 @@ const LECCIONES = [
 <li>Muchas veces conviene más recomendarle al cliente cambiar a un equipo nuevo inverter.</li>
 </ul>` },
 
-{ id: 'r410a', icono: '🩷', titulo: 'R410A: lo que hay que saber', html: `
+{ id: 'r410a', icono: 'flask-conical', titulo: 'R410A: lo que hay que saber', html: `
 <ul>
 <li><b>Tipo:</b> HFC, mezcla 50% R32 + 50% R125. Casi no se separa (casi azeotrópica).</li>
 <li><b>Cilindro:</b> rosa.</li>
@@ -108,7 +132,7 @@ const LECCIONES = [
 </ul>
 <div class="nota">Si hubo fuga, en la práctica se puede completar la carga porque casi no se separa. Lo que piden los fabricantes es recuperar todo y cargar por peso.</div>` },
 
-{ id: 'r32', icono: '🔥', titulo: 'R32 y seguridad (¡importante!)', html: `
+{ id: 'r32', icono: 'flame', titulo: 'R32 y seguridad (¡importante!)', html: `
 <div class="alerta">El R32 es <b>A2L: levemente inflamable</b>. No explota como el gas LP, pero sí puede prender si hay una fuga en un lugar cerrado y una chispa o flama.</div>
 <h3>Datos</h3>
 <ul>
@@ -139,7 +163,7 @@ const LECCIONES = [
 <li>Regresa cuando se haya ventilado.</li>
 </ul>` },
 
-{ id: 'inverter', icono: '⚡', titulo: 'Equipos inverter', html: `
+{ id: 'inverter', icono: 'zap', titulo: 'Equipos inverter', html: `
 <ul>
 <li>El compresor cambia de velocidad. La tarjeta lo controla según la temperatura del cuarto.</li>
 <li>Por eso las presiones y el amperaje cambian todo el tiempo. Para medir, pon el <b>modo prueba</b> (test) o frío a 16 °C con ventilador alto y espera 10–15 min.</li>
@@ -157,7 +181,7 @@ const LECCIONES = [
 <h3>Códigos de error</h3>
 <p>Cambian con cada marca y modelo. Busca la tabla en la tapa de la evaporadora o en el manual y guárdala en <b>Bitácora → Mis apuntes</b> para tenerla siempre.</p>` },
 
-{ id: 'ventana', icono: '🪟', titulo: 'Equipos de ventana', html: `
+{ id: 'ventana', icono: 'air-vent', titulo: 'Equipos de ventana', html: `
 <ul>
 <li>Todo viene en una pieza: compresor, condensador (la parte de afuera), evaporador (la de adentro) y un motor de doble flecha que mueve la turbina de adentro y el aspa de afuera.</li>
 <li>Usa <b>tubo capilar</b> y lleva poco gas: unos gramos de más o de menos cambian mucho cómo trabaja. Cárgalo siempre por peso con lo que dice la placa.</li>
@@ -170,7 +194,7 @@ const LECCIONES = [
 </ul>
 <div class="nota">Si el compresor se dañó, compara el costo de la reparación con el de un equipo nuevo antes de dar precio.</div>` },
 
-{ id: 'calor', icono: '♨️', titulo: 'Calefacción (bomba de calor)', html: `
+{ id: 'calor', icono: 'sun', titulo: 'Calefacción (bomba de calor)', html: `
 <ul>
 <li>Los minisplits "frío-calor" traen una <b>válvula de 4 vías</b> que invierte el ciclo: la evaporadora se vuelve condensador y la condensadora se vuelve evaporador.</li>
 <li>En la mayoría de los minisplits la bobina de la válvula de 4 vías se energiza en calefacción. Si no calienta, mide si le llega voltaje a la bobina y su resistencia.</li>
@@ -180,7 +204,7 @@ const LECCIONES = [
 <li>La carga de gas se revisa en modo frío.</li>
 </ul>` },
 
-{ id: 'vacio', icono: '🌀', titulo: 'Vacío y prueba de hermeticidad', html: `
+{ id: 'vacio', icono: 'circle-gauge', titulo: 'Vacío y prueba de hermeticidad', html: `
 <h3>1. Prueba con nitrógeno</h3>
 <ul>
 <li>Sólo nitrógeno seco, <b>con regulador</b>. Nunca oxígeno ni aire comprimido.</li>
@@ -202,7 +226,7 @@ const LECCIONES = [
 </ul>
 <div class="nota">La práctica vieja de "purgar con el mismo gas" no quita la humedad, desperdicia gas y está prohibida. Haz vacío siempre.</div>` },
 
-{ id: 'flare', icono: '🔧', titulo: 'Abocinado, torque y soldadura', html: `
+{ id: 'flare', icono: 'wrench', titulo: 'Abocinado, torque y soldadura', html: `
 <h3>Abocinado (flare)</h3>
 <ol>
 <li>Corta con cortatubo, no con segueta.</li>
@@ -220,7 +244,7 @@ const LECCIONES = [
 <li>Con R32 nunca se suelda si hay gas en el sistema.</li>
 </ul>` },
 
-{ id: 'carga', icono: '⚖️', titulo: 'Carga de refrigerante', html: `
+{ id: 'carga', icono: 'scale', titulo: 'Carga de refrigerante', html: `
 <ul>
 <li><b>La forma correcta es por peso</b>, con báscula y la carga que dice la placa.</li>
 <li>Si la tubería del minisplit es más larga que lo que trae precargado (casi siempre 5 m, a veces 7.5 m), se agrega gas por cada metro extra. Usa la calculadora <b>Carga por metro extra</b>.</li>
@@ -231,7 +255,7 @@ const LECCIONES = [
 </ul>
 <div class="nota">Si un equipo "sólo necesita gas", tiene una fuga. Busca y repara la fuga antes de cargar, o en unas semanas va a fallar igual.</div>` },
 
-{ id: 'recuperacion', icono: '♻️', titulo: 'Recuperar el gas y pump down', html: `
+{ id: 'recuperacion', icono: 'container', titulo: 'Recuperar el gas y pump down', html: `
 <h3>Pump down (guardar el gas en la condensadora)</h3>
 <p>Se usa para desinstalar o mover un minisplit sin tirar el gas.</p>
 <ol>
@@ -253,7 +277,7 @@ const LECCIONES = [
 <li>Lleva el gas recuperado con tu proveedor o a un centro de acopio para reciclarlo.</li>
 </ul>` },
 
-{ id: 'electrico', icono: '🔌', titulo: 'Electricidad: capacitores y compresor', html: `
+{ id: 'electrico', icono: 'plug', titulo: 'Electricidad: capacitores y compresor', html: `
 <h3>Capacitores</h3>
 <ul>
 <li><b>Descárgalo antes de tocarlo</b>, con una resistencia (por ejemplo 20 kΩ de 5 W). No con desarmador.</li>
@@ -276,7 +300,7 @@ const LECCIONES = [
 <li>Siempre conecta la tierra física.</li>
 </ul>` },
 
-{ id: 'mantto', icono: '🧽', titulo: 'Mantenimiento preventivo', html: `
+{ id: 'mantto', icono: 'droplets', titulo: 'Mantenimiento preventivo', html: `
 <ul>
 <li>Lava los filtros de la evaporadora.</li>
 <li>Lava el serpentín de la evaporadora con líquido limpiador no ácido y bolsa de lavado. Lava también la turbina (blower), que junta mucha mugre.</li>
@@ -289,7 +313,7 @@ const LECCIONES = [
 </ul>
 <p>Usa la lista <b>Mantenimiento preventivo</b> en Herramientas para no saltarte nada.</p>` },
 
-{ id: 'futuro', icono: '🌎', titulo: 'Normas y gases nuevos', html: `
+{ id: 'futuro', icono: 'atom', titulo: 'Normas y gases nuevos', html: `
 <ul>
 <li><b>No ventear:</b> el refrigerante se recupera en un cilindro de recuperación (gris con tapa amarilla). Nunca rellenes los cilindros desechables.</li>
 <li><b>Protocolo de Montreal:</b> elimina los gases que dañan el ozono (R22).</li>
@@ -681,4 +705,65 @@ const GLOSARIO = [
   ['Vacuum pump', 'Bomba de vacío'],
   ['Wet bulb / Dry bulb', 'Bulbo húmedo / bulbo seco'],
   ['Wiring diagram', 'Diagrama eléctrico'],
+];
+
+// Fichas de los gases (propiedades físicas calculadas con CoolProp; GWP a 100 años, IPCC AR4)
+const GASES_INFO = [
+{ id: 'R22', nombre: 'R22', apodo: 'Freón 22', quimico: 'Clorodifluorometano', familia: 'HCFC', tipo: 'Puro',
+  seguridad: 'A1', seguridadTxt: 'No inflamable, baja toxicidad', odp: '0.055', gwp: '1810',
+  ebull: '−40.8 °C', tcrit: '96.1 °C', pcrit: '49.9 bar (724 psia)', aceite: 'Mineral o alquilbenceno',
+  carga: 'Como vapor o líquido (es puro)', cilindro: 'Verde claro',
+  usos: 'Equipos de ventana y splits viejos. Ya no se fabrican equipos nuevos con R22.',
+  claves: [
+    'Daña la capa de ozono: se está eliminando por el Protocolo de Montreal. Cada vez hay menos y es más caro.',
+    'Recupéralo siempre: no lo tires al aire. Sirve para reponer en otros equipos de R22.',
+    'Nunca le metas R410A ni R32 a un equipo de R22: más presión y otro aceite.',
+    'Sustitutos para equipos de R22: R407C, R422D y parecidos. Son mezclas: cambian las presiones, se cargan como líquido y a veces piden cambio de aceite.'],
+  leccion: 'r22' },
+{ id: 'R410A', nombre: 'R410A', apodo: 'Puron', quimico: 'Mezcla de R32 (50%) y R125 (50%)', familia: 'HFC', tipo: 'Mezcla casi azeotrópica',
+  seguridad: 'A1', seguridadTxt: 'No inflamable, baja toxicidad', odp: '0', gwp: '2088',
+  ebull: '−51.4 °C', tcrit: '71.3 °C', pcrit: '49.0 bar (711 psia)', aceite: 'POE (absorbe humedad muy rápido)',
+  carga: 'Siempre como líquido', cilindro: 'Rosa',
+  usos: 'Splits convencionales e inverter de más o menos 2005 a 2020.',
+  claves: [
+    'Trabaja a unas 1.6 veces la presión del R22: usa manómetros y mangueras de alta presión.',
+    'Se carga como líquido, despacio por la succión y estrangulando la llave.',
+    'El aceite POE se llena de humedad si dejas el sistema abierto: tapa tubos y haz buen vacío.',
+    'Su temperatura crítica es baja (71 °C): con condensador sucio y mucho calor la alta se dispara.',
+    'Tuercas flare de 1/2" y 5/8" más grandes que las de R22.'],
+  leccion: 'r410a' },
+{ id: 'R32', nombre: 'R32', apodo: '', quimico: 'Difluorometano', familia: 'HFC', tipo: 'Puro',
+  seguridad: 'A2L', seguridadTxt: 'Levemente inflamable', odp: '0', gwp: '675',
+  ebull: '−51.7 °C', tcrit: '78.1 °C', pcrit: '57.8 bar (839 psia)', aceite: 'POE o PVE, según la marca',
+  carga: 'Como vapor o líquido (es puro). Siempre por peso.', cilindro: 'Varía según la marca; lleva franja o marca roja de inflamable',
+  usos: 'Casi todos los splits e inverter nuevos.',
+  claves: [
+    'Presión parecida al R410A, un poco más alta (3–5%). Temperatura de descarga más alta.',
+    'Lleva menos gas que un equipo de R410A del mismo tamaño.',
+    'Nunca soldar con gas adentro: recupera, haz vacío, barre y suelda con nitrógeno.',
+    'Herramientas aptas para A2L: detector de fugas, bomba de vacío y recuperadora sin chispa.',
+    'Es más pesado que el aire: si se fuga, se junta en el piso.',
+    'Si se quema suelta ácido fluorhídrico, muy tóxico.'],
+  leccion: 'r32' },
+{ id: 'R290', nombre: 'R290', apodo: 'Propano', quimico: 'Propano', familia: 'Hidrocarburo (HC)', tipo: 'Puro',
+  seguridad: 'A3', seguridadTxt: 'MUY inflamable', odp: '0', gwp: '3',
+  ebull: '−42.1 °C', tcrit: '96.7 °C', pcrit: '42.5 bar (617 psia)', aceite: 'Mineral o sintético, según el fabricante',
+  carga: 'Por peso exacto; son cargas muy pequeñas (gramos)', cilindro: 'Varía; lleva marca roja de inflamable',
+  usos: 'Equipos de ventana, portátiles y algunos splits pequeños nuevos.',
+  claves: [
+    'Trátalo como gas LP: nada de flama, cigarros ni chispas cerca.',
+    'Presiones muy parecidas al R22, pero es otro gas: no se mezclan.',
+    'Sólo con herramienta apta para A3 y en lugar ventilado.',
+    'Nunca se suelda con gas adentro. Muchos fabricantes piden uniones sin soldar (anillos de presión) o técnicos certificados.',
+    'Revisa la etiqueta de flama en la placa antes de abrir cualquier equipo nuevo.'],
+  leccion: 'futuro' },
+];
+
+// Otros gases que se pueden encontrar
+const OTROS_GASES = [
+  { gas: 'R407C', txt: 'Sustituto del R22 (mezcla R32/R125/R134a). Tiene deslizamiento de unos 7 °C: se carga como líquido y no se completa después de una fuga. Aceite POE. A1, GWP 1774.' },
+  { gas: 'R422D', txt: 'Sustituto del R22 que en muchos casos trabaja con el aceite mineral original. Mezcla: carga en líquido. A1, GWP 2729.' },
+  { gas: 'R454B', txt: 'Sustituto del R410A en equipos nuevos (sobre todo en EE.UU.). Mezcla A2L (levemente inflamable), GWP 466.' },
+  { gas: 'R134a', txt: 'Refrigeradores, bebederos y aire de autos. Hierve a −26.1 °C; presiones más bajas que el R22. Aceite POE (PAG en autos). A1, GWP 1430.' },
+  { gas: 'R600a', txt: 'Isobutano. Refrigeradores domésticos nuevos. A3, muy inflamable, cargas de pocos gramos.' },
 ];

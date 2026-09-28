@@ -123,9 +123,10 @@ function filaServicio(s) {
 
 function abrirWhatsApp(tel, texto) {
   let d = String(tel || '').replace(/\D/g, '');
-  if (d.length === 13 && d.startsWith('521')) d = '52' + d.slice(3);
-  if (d.length === 10) d = '52' + d;
-  if (d.length >= 11) window.open(`https://wa.me/${d}?text=${encodeURIComponent(texto)}`, '_blank', 'noopener');
+  const p = pais(); // Cuba: +53 y 8 dígitos; México: +52 y 10 dígitos
+  if (p.tel === '52' && d.length === 13 && d.startsWith('521')) d = '52' + d.slice(3);
+  if (d.length === p.digitos) d = p.tel + d;
+  if (d.length >= 10) window.open(`https://wa.me/${d}?text=${encodeURIComponent(texto)}`, '_blank', 'noopener');
   else compartir(texto);
 }
 
@@ -180,19 +181,19 @@ VISTAS.bitacora = () => {
   const borr = store.get('borrador', null);
   const nombreBorr = borr?.datos?.cliente;
 
-  app.innerHTML = `${borr ? `<div class="nota aviso-borrador"><span>📝 Tienes un servicio sin guardar${nombreBorr ? ` de <b>${esc(nombreBorr)}</b>` : ''}.</span><a class="btn chico" href="#editar/${esc(borr.para)}">Continuar</a></div>` : ''}
-    <a class="btn" href="#editar/nuevo">＋ Nuevo servicio</a>
-    ${pideRespaldo ? `<div class="nota">💾 ${respaldo ? 'Hace más de un mes que no guardas un respaldo.' : 'Todavía no guardas ningún respaldo.'} Si se pierde o se cambia el teléfono, se pierde la bitácora.<div class="acciones"><button class="btn chico" id="respaldar">Guardar respaldo</button></div></div>` : ''}
+  app.innerHTML = `${borr ? `<div class="nota aviso-borrador"><span>Tienes un servicio sin guardar${nombreBorr ? ` de <b>${esc(nombreBorr)}</b>` : ''}.</span><a class="btn chico" href="#editar/${esc(borr.para)}">Continuar</a></div>` : ''}
+    <a class="btn" href="#editar/nuevo">${ico('plus')} Nuevo servicio</a>
+    ${pideRespaldo ? `<div class="nota">${ico('save')} ${respaldo ? 'Hace más de un mes que no guardas un respaldo.' : 'Todavía no guardas ningún respaldo.'} Si se pierde o se cambia el teléfono, se pierde la bitácora.<div class="acciones"><button class="btn chico" id="respaldar">Guardar respaldo</button></div></div>` : ''}
     ${lista.length ? `<div class="card"><b>Este mes:</b> ${nMes} servicio${nMes === 1 ? '' : 's'} · ${dinero($Mes)}<br><span class="muted">Mes pasado: ${nAnt} · ${dinero($Ant)}</span></div>` : ''}
     ${proximos.length ? `<h2>Mantenimientos por hacer</h2>${proximos.map(s => {
       const vencido = s.proximo < hoy();
       return `<div class="card"><a href="#servicio/${s.id}" style="color:inherit;text-decoration:none"><b>${esc(s.cliente)}</b><br><span class="muted">${esc(equipoDe(s) || s.tipo || '')}</span></a>
         <div><span class="pill ${vencido ? 'vencido' : 'vence'}">${vencido ? 'Venció' : 'Toca'} ${fechaBonita(s.proximo)}</span></div>
-        <div class="acciones"><button class="btn chico ok" data-recordar="${s.id}">💬 Recordarle</button><button class="btn chico sec" data-quitar="${s.id}">Quitar</button></div></div>`;
+        <div class="acciones"><button class="btn chico ok" data-recordar="${s.id}">${ico('message-circle')} Recordarle</button><button class="btn chico sec" data-quitar="${s.id}">Quitar</button></div></div>`;
     }).join('')}` : ''}
-    <a class="item" href="#apuntes"><span class="ico">🗒️</span><span class="grow">Mis apuntes<span class="sub">Códigos de error, notas, proveedores</span></span>›</a>
+    ${item('#apuntes', 'notebook-pen', 'ambar', 'Mis apuntes', 'Códigos de error, notas, proveedores')}
     <h2>Servicios (${lista.length})</h2>
-    ${lista.length ? '<input id="buscar" placeholder="🔍 Buscar cliente, marca, colonia…" type="search" autocomplete="off">' : '<p class="muted">Aquí se guardan los servicios que hagas: cliente, equipo, mediciones, fotos, cobro y cuándo toca el siguiente mantenimiento.</p>'}
+    ${lista.length ? '<input id="buscar" placeholder="Buscar cliente, marca, zona…" type="search" autocomplete="off">' : '<p class="muted">Aquí se guardan los servicios que hagas: cliente, equipo, mediciones, fotos, cobro y cuándo toca el siguiente mantenimiento.</p>'}
     <div id="lista"></div>`;
   const pintaLista = q => {
     const w = norm(q).split(/\s+/).filter(Boolean);
@@ -236,13 +237,13 @@ VISTAS.servicio = id => {
     ${cs.length || total ? `<div class="card"><b>Cobro</b><table>${cs.map(c => `<tr><td>${esc(c.d || 'Concepto')}</td><td class="num">${dinero(num(c.p) || 0)}</td></tr>`).join('')}</table>
       <div class="total"><span>Total</span><span>${dinero(total)}</span></div></div>` : ''}
     ${(s.fotos || []).length ? '<h3>Fotos</h3><div class="fotos" id="fotos"></div>' : ''}
-    ${s.tel ? `<div class="acciones"><a class="btn sec" href="tel:${esc(s.tel.replace(/[^\d+]/g, ''))}">📞 Llamar</a><button class="btn sec" id="wa">💬 WhatsApp</button></div>` : ''}
-    ${s.tel ? '<button class="btn" id="nota">💬 Mandarle la nota</button>' : ''}
-    <button class="btn ${s.tel ? 'sec' : ''}" id="comp">📤 Compartir nota</button>
-    <a class="btn sec" href="#editar/${s.id}">✏️ Editar</a>
-    <a class="btn sec" href="#editar/nuevo/${s.id}">＋ Nuevo servicio para este cliente</a>
+    ${s.tel ? `<div class="acciones"><a class="btn sec" href="tel:${esc(s.tel.replace(/[^\d+]/g, ''))}">${ico('phone')} Llamar</a><button class="btn sec" id="wa">${ico('message-circle')} WhatsApp</button></div>` : ''}
+    ${s.tel ? `<button class="btn" id="nota">${ico('message-circle')} Mandarle la nota</button>` : ''}
+    <button class="btn ${s.tel ? 'sec' : ''}" id="comp">${ico('share-2')} Compartir nota</button>
+    <a class="btn sec" href="#editar/${s.id}">${ico('pencil')} Editar</a>
+    <a class="btn sec" href="#editar/nuevo/${s.id}">${ico('plus')} Nuevo servicio para este cliente</a>
     ${otros.length ? `<h3>Otros servicios de este cliente</h3>${otros.map(x => filaServicio(x)).join('')}` : ''}
-    <button class="btn bad" id="borrar">🗑 Borrar servicio</button>`;
+    <button class="btn bad" id="borrar">${ico('trash-2')} Borrar servicio</button>`;
   if ((s.fotos || []).length) pintaFotos($('#fotos'), s.fotos);
   $('#wa')?.addEventListener('click', () => abrirWhatsApp(s.tel, `Hola ${s.cliente}, `));
   $('#nota')?.addEventListener('click', () => abrirWhatsApp(s.tel, textoServicio(s)));
@@ -300,19 +301,19 @@ VISTAS.editar = (id, desde) => {
     <h3>Fotos</h3>
     <p class="muted">La placa de datos, antes y después, piezas dañadas.</p>
     <div class="fotos" id="fotos"></div>
-    <div class="row"><button type="button" class="btn sec" id="camara">📷 Tomar foto</button><button type="button" class="btn sec" id="galeria">🖼 Galería</button></div>
+    <div class="row"><button type="button" class="btn sec" id="camara">${ico('camera')} Tomar foto</button><button type="button" class="btn sec" id="galeria">${ico('image')} Galería</button></div>
     <p class="muted hidden" id="fotoEstado">Guardando foto…</p>
     <input type="file" id="inCamara" accept="image/*" capture="environment" class="hidden">
     <input type="file" id="inGaleria" accept="image/*" multiple class="hidden">
     <h3>Cobro</h3>
     <div id="conceptos"></div>
     ${precios.length ? `<p class="muted">Toca para agregar:</p><div class="chips">${precios.map(p => `<button type="button" class="chip" data-precio="${p.id}">${esc(p.t)}${num(p.p) ? ' · ' + dinero(num(p.p)) : ''}</button>`).join('')}</div>` : '<p class="muted">Guarda tus precios en Ajustes → Mis precios para agregarlos con un toque.</p>'}
-    <button type="button" class="btn sec" id="agregar">＋ Agregar concepto</button>
+    <button type="button" class="btn sec" id="agregar">${ico('plus')} Agregar concepto</button>
     <div class="total"><span>Total</span><span id="total">$0</span></div>
     <h3>Próximo mantenimiento</h3>
     ${txt('proximo', 'Fecha', 'type="date"')}
     <div class="seg"><button type="button" data-meses="3">+3 meses</button><button type="button" data-meses="6">+6 meses</button><button type="button" data-meses="12">+1 año</button><button type="button" data-meses="0">Ninguno</button></div>
-    <button class="btn" type="submit">💾 Guardar</button>
+    <button class="btn" type="submit">${ico('save')} Guardar</button>
     </form>`;
 
   const leerForm = () => { CAMPOS.forEach(k => { const el = $('#f_' + k); if (el) s[k] = el.value.trim(); }); };
@@ -401,7 +402,7 @@ VISTAS.precios = () => {
     const l = store.get('precios', []);
     app.innerHTML = `<p class="muted">Guarda lo que cobras seguido. Al hacer una nota los tocas y se agregan al cobro.</p>
       <div id="lista">${l.map(p => `<div class="concepto"><input data-id="${p.id}" data-k="t" value="${esc(p.t)}" placeholder="Concepto"><input class="precio" data-id="${p.id}" data-k="p" value="${esc(p.p)}" inputmode="decimal" placeholder="$"><button type="button" data-q="${p.id}" aria-label="Quitar precio">✕</button></div>`).join('')}</div>
-      <button class="btn sec" id="agregar">＋ Agregar precio</button>
+      <button class="btn sec" id="agregar">${ico('plus')} Agregar precio</button>
       ${l.length ? '' : '<button class="btn sec" id="ejemplos">Poner conceptos de ejemplo</button>'}`;
     $('#lista').addEventListener('input', e => {
       const l = store.get('precios', []), p = l.find(x => x.id === e.target.dataset.id);
@@ -433,13 +434,13 @@ VISTAS.precios = () => {
 // ---------- Apuntes ----------
 VISTAS.apuntes = () => {
   const a = store.get('apuntes', []).sort((x, y) => (y.editado || 0) - (x.editado || 0));
-  app.innerHTML = `<a class="btn" href="#apunte/nuevo">＋ Nuevo apunte</a>
+  app.innerHTML = `<a class="btn" href="#apunte/nuevo">${ico('plus')} Nuevo apunte</a>
     <p class="muted">Guarda aquí las tablas de códigos de error de cada marca, precios de refacciones, proveedores o lo que quieras recordar.</p>
-    ${a.length ? '<input id="buscar" type="search" placeholder="🔍 Buscar en apuntes…" autocomplete="off">' : ''}<div id="lista"></div>`;
+    ${a.length ? '<input id="buscar" type="search" placeholder="Buscar en apuntes…" autocomplete="off">' : ''}<div id="lista"></div>`;
   const pinta = q => {
     const w = norm(q);
     $('#lista').innerHTML = a.filter(x => !w || norm(x.titulo + ' ' + x.texto).includes(w))
-      .map(x => `<a class="item" href="#apunte/${x.id}"><span class="grow">${esc(x.titulo || 'Sin título')}<span class="sub">${esc((x.texto || '').slice(0, 80))}</span></span>›</a>`).join('');
+      .map(x => item(`#apunte/${x.id}`, 'notebook-pen', 'ambar', esc(x.titulo || 'Sin título'), esc((x.texto || '').slice(0, 80)))).join('');
   };
   $('#buscar')?.addEventListener('input', e => pinta(e.target.value));
   pinta('');
@@ -450,10 +451,11 @@ VISTAS.apunte = id => {
   const nuevo = id === 'nuevo';
   const x = nuevo ? { titulo: '', texto: '' } : store.get('apuntes', []).find(a => a.id === id);
   if (!x) { ir('apuntes', true); return; }
-  app.innerHTML = `<label for="t">Título</label><input id="t" value="${esc(x.titulo)}" placeholder="Ej. Códigos de error Mirage">
+  app.innerHTML = `<label for="t">Título</label><input id="t" value="${esc(x.titulo)}" placeholder="Ej. Códigos de error Midea">
     <label for="x">Texto</label><textarea id="x" style="min-height:17rem">${esc(x.texto)}</textarea>
-    <button class="btn" id="guardar">💾 Guardar</button>
-    ${nuevo ? '' : '<button class="btn sec" id="comp">📤 Compartir</button><button class="btn bad" id="borrar">🗑 Borrar</button>'}`;
+    <button class="btn" id="guardar">${ico('save')} Guardar</button>
+    ${nuevo ? '' : `<button class="btn sec" id="comp">${ico('share-2')} Compartir</button><button class="btn bad" id="borrar">${ico('trash-2')} Borrar</button>`}`;
+
   $('#guardar').onclick = () => {
     const lista = store.get('apuntes', []);
     const reg = { id: nuevo ? uid() : id, titulo: $('#t').value.trim(), texto: $('#x').value, editado: Date.now() };

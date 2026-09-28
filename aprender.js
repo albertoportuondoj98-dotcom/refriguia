@@ -2,12 +2,12 @@
 'use strict';
 
 const botonesHerramientas = rs => rs.map(HERRAMIENTA).filter(Boolean)
-  .map(h => `<a class="item" href="#${h.r}"><span class="ico">${h.i}</span><span class="grow">${h.t}</span>›</a>`).join('');
+  .map(itemHerramienta).join('');
 
 VISTAS.fallas = () => {
   app.innerHTML = `${botonesHerramientas(['diag', 'dt'])}
     <h2>¿Qué le pasa al equipo?</h2>
-    ${FALLAS.map((f, i) => `<a class="item" href="#falla/${i}"><span class="grow">${f.t}</span>›</a>`).join('')}`;
+    ${FALLAS.map((f, i) => item(`#falla/${i}`, 'stethoscope', 'rojo', f.t)).join('')}`;
   return 'Fallas';
 };
 
@@ -41,7 +41,7 @@ function preguntaDelDia() {
   const r = store.get('pdia', {});
   const elegida = r.dia === dia ? r.i : null;
   const cont = $('#pdia');
-  cont.innerHTML = `<h3>💡 Pregunta del día</h3><p><b>${q.p}</b></p>
+  cont.innerHTML = `<h3>${ico('lightbulb')} Pregunta del día</h3><p><b>${q.p}</b></p>
     ${orden.map(i => {
       const cls = elegida == null ? '' : i === q.r ? 'ok' : i === elegida ? 'no' : '';
       return `<button class="quiz-op ${cls}" data-i="${i}">${q.o[i]}</button>`;
@@ -62,14 +62,15 @@ VISTAS.aprender = () => {
   const leidas = new Set(store.get('leidas', []));
   const nLeidas = LECCIONES.filter(l => leidas.has(l.id)).length;
   app.innerHTML = `<div class="card" id="pdia"></div>
-    <a class="item" href="#quiz"><span class="ico">📝</span><span class="grow">Examen de repaso<span class="sub">${ult ? `Último: ${ult.b} de ${ult.t} (${fechaBonita(ult.f)})` : `10 preguntas al azar de ${QUIZ.length}`}</span></span>›</a>
-    ${falladas ? `<a class="item" href="#quiz/errores"><span class="ico">🔁</span><span class="grow">Repasar las que fallé<span class="sub">${falladas} pregunta${falladas === 1 ? '' : 's'}</span></span>›</a>` : ''}
-    <a class="item" href="#glosario"><span class="ico">🔤</span><span class="grow">Glosario inglés-español<span class="sub">Lo que viene en placas, manuales y códigos</span></span>›</a>
+    ${item('#quiz', 'graduation-cap', 'azul', 'Examen de repaso', ult ? `Último: ${ult.b} de ${ult.t} (${fechaBonita(ult.f)})` : `10 preguntas al azar de ${QUIZ.length}`)}
+    ${falladas ? item('#quiz/errores', 'refresh-cw', 'naranja', 'Repasar las que fallé', `${falladas} pregunta${falladas === 1 ? '' : 's'}`) : ''}
+    ${item('#gases', 'flask-conical', 'verde', 'Fichas de los gases', 'R22, R410A, R32, R290 y otros')}
+    ${item('#glosario', 'languages', 'rosa', 'Glosario inglés-español', 'Lo que viene en placas, manuales y códigos')}
     ${st.resp ? `<p class="muted">Llevas ${st.resp} respuestas, ${fmt(st.buenas / st.resp * 100, 0)}% correctas.</p>` : ''}
     <h2>Lecciones</h2>
     <div class="bar"><i style="width:${nLeidas / LECCIONES.length * 100}%"></i></div>
     <p class="muted">${nLeidas} de ${LECCIONES.length} leídas</p>
-    ${LECCIONES.map(l => `<a class="item" href="#leccion/${l.id}"><span class="ico">${l.icono}</span><span class="grow">${l.titulo}${leidas.has(l.id) ? '<span class="sub">✓ Leída</span>' : ''}</span>›</a>`).join('')}`;
+    ${LECCIONES.map(l => item(`#leccion/${l.id}`, l.icono, leidas.has(l.id) ? 'verde' : 'morado', l.titulo, leidas.has(l.id) ? '✓ Leída' : '')).join('')}`;
   preguntaDelDia();
   return 'Aprender';
 };
@@ -79,7 +80,8 @@ VISTAS.leccion = id => {
   if (i < 0) { ir('aprender', true); return; }
   const l = LECCIONES[i], sig = LECCIONES[i + 1];
   const leidas = new Set(store.get('leidas', [])); leidas.add(l.id); store.set('leidas', [...leidas]);
-  app.innerHTML = `<h2>${l.icono} ${l.titulo}</h2>${l.html}
+  app.innerHTML = `<h2>${l.titulo}</h2>${l.html}
+
     ${sig ? `<a class="btn" href="#leccion/${sig.id}">Siguiente: ${sig.titulo} →</a>` : '<a class="btn" href="#quiz">Hacer el examen →</a>'}`;
   return 'Lección';
 };
