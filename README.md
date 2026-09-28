@@ -22,6 +22,10 @@ Funciona sin internet una vez instalada en el teléfono.
 - `data.js` (contenido técnico), `pt.js` (tablas P-T generadas con `gen_pt.py` y CoolProp)
 - `sw.js` (funcionamiento sin internet), `manifest.webmanifest`, íconos
 
+## Abrir la app
+
+**https://albertoportuondoj98-dotcom.github.io/refriguia/**
+
 ## Instalar en Android
 1. Publicar esta carpeta en un hosting con HTTPS (por ejemplo GitHub Pages o Netlify).
 2. En el teléfono abrir la dirección en Chrome (con internet, sólo esta vez).
