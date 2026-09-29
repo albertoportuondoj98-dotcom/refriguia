@@ -288,8 +288,14 @@ function manometro(valor, max, rango, color, titulo, sub) {
 // ---------- Lectura en voz alta ----------
 const voz = {
   hablando: false,
-  disponible: () => 'speechSynthesis' in window,
+  disponible: () => ES_APK || 'speechSynthesis' in window,
   leer(texto, boton) {
+    if (ES_APK) { // voz del teléfono (TextToSpeech de Android)
+      if (this.hablando) { this.parar(); if (boton) boton.innerHTML = `${ico('bell')} Escuchar`; return; }
+      Android.hablar(texto); this.hablando = true;
+      if (boton) boton.innerHTML = `${ico('x')} Parar`;
+      return;
+    }
     if (!this.disponible()) return;
     if (this.hablando) { this.parar(); return; }
     const u = new SpeechSynthesisUtterance(texto);
@@ -300,5 +306,9 @@ const voz = {
     speechSynthesis.cancel(); speechSynthesis.speak(u);
     this.hablando = true; if (boton) boton.innerHTML = `${ico('x')} Parar`;
   },
-  parar() { try { speechSynthesis.cancel(); } catch {} this.hablando = false; },
+  parar() {
+    try { if (ES_APK) Android.callar(); else speechSynthesis.cancel(); } catch {}
+    this.hablando = false;
+  },
+
 };

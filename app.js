@@ -6,6 +6,7 @@ const VERSION = '3.1';
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const app = $('#app');
+const ES_APK = typeof window.Android !== 'undefined'; // dentro del APK de Android
 const GASES = ['R22', 'R410A', 'R32', 'R290'];
 const GASES_TRABAJO = ['R22', 'R410A', 'R32'];
 
@@ -187,16 +188,29 @@ function alarma() {
 
 const pantalla = { // mantiene la pantalla encendida (cronómetro de vacío, nivel)
   lock: null,
-  async pedir() { try { this.lock = await navigator.wakeLock?.request('screen') ?? null; } catch { this.lock = null; } },
-  soltar() { try { this.lock?.release(); } catch {} this.lock = null; },
+  async pedir() {
+    if (ES_APK) { try { Android.pantalla(true); } catch {} return; }
+    try { this.lock = await navigator.wakeLock?.request('screen') ?? null; } catch { this.lock = null; }
+  },
+  soltar() {
+    if (ES_APK) { try { Android.pantalla(false); } catch {} return; }
+    try { this.lock?.release(); } catch {} this.lock = null;
+  },
 };
 
 async function compartir(texto) {
+  if (ES_APK) { Android.compartirTexto(texto); return; }
   if (navigator.share) { try { await navigator.share({ text: texto }); return; } catch (e) { if (e.name === 'AbortError') return; } }
   try { await navigator.clipboard.writeText(texto); alert('Copiado. Pégalo en WhatsApp.'); }
   catch { prompt('Copia este texto:', texto); }
 }
 function descargar(archivo) {
+  if (ES_APK) { // en el APK se manda con el menú de compartir de Android
+    const r = new FileReader();
+    r.onload = () => Android.compartirArchivo(archivo.name, archivo.type || 'application/octet-stream', String(r.result).split(',')[1] || '');
+    r.readAsDataURL(archivo);
+    return;
+  }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(archivo); a.download = archivo.name;
   document.body.appendChild(a); a.click(); a.remove();
@@ -354,8 +368,8 @@ VISTAS.ajustes = () => {
   }).catch(() => {});
   const publica = location.protocol.startsWith('http') && !/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
   const url = location.origin + location.pathname;
-  $('#compartirApp').classList.toggle('hidden', !publica);
-  $('#compartirApp').onclick = () => compartir(`RefriGuía: tablas P-T, diagnóstico y bitácora para técnicos de aire acondicionado. Funciona sin internet. Ábrela en Chrome y toca "Instalar app": ${url}`);
+  $('#compartirApp').classList.toggle('hidden', !publica && !ES_APK);
+  $('#compartirApp').onclick = () => ES_APK ? Android.compartirApk() : compartir(`RefriGuía: tablas P-T, diagnóstico y bitácora para técnicos de aire acondicionado. Funciona sin internet. Ábrela en Chrome y toca "Instalar app": ${url}`);
   return 'Ajustes';
 };
 
@@ -411,7 +425,8 @@ VISTAS.buscar = () => {
 // ---------- Arranque ----------
 document.addEventListener('DOMContentLoaded', render);
 
-if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+if ('serviceWorker' in navigator && location.protocol.startsWith('http') && !ES_APK) {
+
   let actualizando = false;
   navigator.serviceWorker.addEventListener('controllerchange', () => { if (actualizando) { actualizando = false; location.reload(); } });
   navigator.serviceWorker.register('sw.js').then(reg => {
