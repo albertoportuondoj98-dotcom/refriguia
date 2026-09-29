@@ -3,3 +3,4 @@ build/
 *.keystore
 clave.txt
 *.apk
+*.idsig
