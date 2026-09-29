@@ -22,6 +22,13 @@ const SECCIONES = [
     { r: 'tablas', i: 'wrench', c: 'gris', t: 'Torque, tuberías y presiones', k: 'torque flare tuberia diametro presiones referencia' },
     { r: 'listas', i: 'list-checks', c: 'verde', t: 'Listas de revisión', k: 'checklist lista instalacion mantenimiento seguridad pump down desinstalar' },
   ] },
+  { t: 'Consulta', items: [
+    { r: 'codigos', i: 'triangle-alert', c: 'rojo', t: 'Códigos de error', k: 'codigo error falla midea gree lg e1 e6 ch05 pantalla parpadea' },
+    { r: 'diagramas', i: 'layers', c: 'azul', t: 'Diagramas', k: 'diagrama electrico conexion capacitor compresor ciclo tuberia' },
+    { r: 'piezas', i: 'cpu', c: 'morado', t: 'Piezas del equipo', k: 'piezas componentes dibujos compresor capilar contactor valvula' },
+    { r: 'casos', i: 'lightbulb', c: 'ambar', t: 'Casos prácticos', k: 'casos practica ejercicio diagnostico' },
+    { r: 'refacciones', i: 'wrench', c: 'naranja', t: 'Refacciones', k: 'refacciones capacitor contactor sensor repuesto' },
+  ] },
   { t: 'Otros', items: [
     { r: 'conv', i: 'arrow-left-right', c: 'azul', t: 'Conversiones', k: 'convertir unidades btu kw psi bar libras kilos pies' },
     { r: 'glosario', i: 'languages', c: 'rosa', t: 'Glosario inglés-español', k: 'ingles traduccion palabras manual placa codigo' },
@@ -271,6 +278,12 @@ VISTAS.diag = () => {
     if (![te, tc, pb].every(Number.isFinite)) { $('#res').innerHTML = '<p class="muted">Llena al menos la temperatura de afuera, la del cuarto y la presión de baja.</p>'; return; }
     const ev = [tc - REGLAS.evap[1], tc - REGLAS.evap[0]], co = [te + REGLAS.cond[0], te + REGLAS.cond[1]];
     const tb = satT(g, aPsi(pb, pu));
+    const verMano = () => {
+      const maxB = { R22: 150, R290: 150, R410A: 250, R32: 250 }[g], maxA = { R22: 400, R290: 400, R410A: 600, R32: 600 }[g];
+      const f = x => psiA(x, pu);
+      return `<div class="manos">${manometro(pb, f(maxB), [f(satP(g, tc - REGLAS.evap[1])), f(satP(g, tc - REGLAS.evap[0]))], '#2563eb', 'Baja', `${fmt(tA(tb, u))}${tU(u)}`)}${
+        Number.isFinite(pa) ? manometro(pa, f(maxA), [f(satP(g, te + REGLAS.cond[0])), f(satP(g, te + REGLAS.cond[1]))], '#dc2626', 'Alta', `${fmt(tA(satT(g, aPsi(pa, pu)), u))}${tU(u)}`) : ''}</div>`;
+    };
     if (!Number.isFinite(tb)) { $('#res').innerHTML = resultado('warn', 'Baja fuera de rango', `La tabla de ${g} va de ${rangoPT(g)}.`); return; }
     const hayAlta = Number.isFinite(pa);
     if (hayAlta && pa <= pb) { $('#res').innerHTML = resultado('warn', 'Revisa las presiones', 'La alta debe ser mayor que la baja.'); return; }
@@ -284,8 +297,9 @@ VISTAS.diag = () => {
     const T = c => `${fmt(tA(c, u))}${tU(u)}`;
     const shTxt = sh == null ? '<span class="muted">Sin dato</span>'
       : `${fmt(dA(sh, u))} ${tU(u)} <span class="estado ${s === 'normal' ? 'ok' : 'warn'}">${s === 'normal' ? 'Normal' : s === 'bajo' ? 'Bajo' : 'Alto'}</span>`;
-    $('#res').innerHTML = `<div class="card"><table>
+    $('#res').innerHTML = `${Number.isFinite(tb) ? verMano() : ''}<div class="card"><table>
       <tr><th></th><th>Medido</th><th>Esperado</th></tr>
+
       <tr><td><b>Baja</b></td><td>${fmt(pb, pDec(pu))} ${pu}<br><span class="muted">${T(tb)}</span><br>${estado(b)}</td><td>${P(ev[0])}–${P(ev[1])} ${pu}<br><span class="muted">${T(ev[0])} a ${T(ev[1])}</span></td></tr>
       <tr><td><b>Alta</b></td><td>${hayAlta ? `${fmt(pa, pDec(pu))} ${pu}<br><span class="muted">${T(ta)}</span><br>${estado(a)}` : '<span class="muted">Sin dato</span>'}</td><td>${P(co[0])}–${P(co[1])} ${pu}<br><span class="muted">${T(co[0])} a ${T(co[1])}</span></td></tr>
       <tr><td><b>SH</b></td><td>${shTxt}</td><td>${fmt(dA(3, u))}–${fmt(dA(8, u))} ${tU(u)}</td></tr>

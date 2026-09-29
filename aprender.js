@@ -5,7 +5,7 @@ const botonesHerramientas = rs => rs.map(HERRAMIENTA).filter(Boolean)
   .map(itemHerramienta).join('');
 
 VISTAS.fallas = () => {
-  app.innerHTML = `${botonesHerramientas(['diag', 'dt'])}
+  app.innerHTML = `${botonesHerramientas(['codigos', 'diag', 'dt'])}
     <h2>¿Qué le pasa al equipo?</h2>
     ${FALLAS.map((f, i) => item(`#falla/${i}`, 'stethoscope', 'rojo', f.t)).join('')}`;
   return 'Fallas';
@@ -64,7 +64,10 @@ VISTAS.aprender = () => {
   app.innerHTML = `<div class="card" id="pdia"></div>
     ${item('#quiz', 'graduation-cap', 'azul', 'Examen de repaso', ult ? `Último: ${ult.b} de ${ult.t} (${fechaBonita(ult.f)})` : `10 preguntas al azar de ${QUIZ.length}`)}
     ${falladas ? item('#quiz/errores', 'refresh-cw', 'naranja', 'Repasar las que fallé', `${falladas} pregunta${falladas === 1 ? '' : 's'}`) : ''}
+    ${item('#casos', 'lightbulb', 'ambar', 'Casos prácticos', `${CASOS.length} situaciones reales para diagnosticar`)}
     ${item('#gases', 'flask-conical', 'verde', 'Fichas de los gases', 'R22, R410A, R32, R290 y otros')}
+    ${item('#piezas', 'cpu', 'morado', 'Piezas del equipo', 'Con dibujo y para qué sirve cada una')}
+    ${item('#diagramas', 'layers', 'azul', 'Diagramas', 'Ciclo, capacitor doble, compresor y tubería')}
     ${item('#glosario', 'languages', 'rosa', 'Glosario inglés-español', 'Lo que viene en placas, manuales y códigos')}
     ${st.resp ? `<p class="muted">Llevas ${st.resp} respuestas, ${fmt(st.buenas / st.resp * 100, 0)}% correctas.</p>` : ''}
     <h2>Lecciones</h2>
@@ -80,9 +83,12 @@ VISTAS.leccion = id => {
   if (i < 0) { ir('aprender', true); return; }
   const l = LECCIONES[i], sig = LECCIONES[i + 1];
   const leidas = new Set(store.get('leidas', [])); leidas.add(l.id); store.set('leidas', [...leidas]);
-  app.innerHTML = `<h2>${l.titulo}</h2>${l.html}
+  app.innerHTML = `<h2>${l.titulo}</h2>${voz.disponible() ? `<button class="btn sec" id="escuchar">${ico('bell')} Escuchar</button>` : ''}${l.html}
 
     ${sig ? `<a class="btn" href="#leccion/${sig.id}">Siguiente: ${sig.titulo} →</a>` : '<a class="btn" href="#quiz">Hacer el examen →</a>'}`;
+  $('#escuchar')?.addEventListener('click', e => voz.leer(l.titulo + '. ' + textoPlano(l.html), e.currentTarget));
+  alSalir(() => voz.parar());
+
   return 'Lección';
 };
 

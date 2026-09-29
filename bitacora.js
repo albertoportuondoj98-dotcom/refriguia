@@ -193,6 +193,7 @@ VISTAS.bitacora = () => {
     }).join('')}` : ''}
     ${item('#apuntes', 'notebook-pen', 'ambar', 'Mis apuntes', 'Códigos de error, notas, proveedores')}
     <h2>Servicios (${lista.length})</h2>
+    ${lista.length ? `<button class="btn sec" id="csv">${ico('table')} Pasar a Excel</button>` : ''}
     ${lista.length ? '<input id="buscar" placeholder="Buscar cliente, marca, zona…" type="search" autocomplete="off">' : '<p class="muted">Aquí se guardan los servicios que hagas: cliente, equipo, mediciones, fotos, cobro y cuándo toca el siguiente mantenimiento.</p>'}
     <div id="lista"></div>`;
   const pintaLista = q => {
@@ -204,6 +205,8 @@ VISTAS.bitacora = () => {
   $('#buscar')?.addEventListener('input', e => pintaLista(e.target.value));
   pintaLista('');
   $('#respaldar')?.addEventListener('click', () => exportar(true));
+  $('#csv')?.addEventListener('click', exportarCSV);
+
   $$('[data-recordar]').forEach(b => b.onclick = () => {
     const s = lista.find(x => x.id === b.dataset.recordar);
     if (s) abrirWhatsApp(s.tel, recordatorio(s));
@@ -530,4 +533,18 @@ async function importar(archivo) {
   }
   alert(malas ? `Respaldo cargado, pero ${malas} foto(s) no se pudieron recuperar.` : 'Respaldo cargado.');
   render();
+}
+
+// ---------- Pasar la bitácora a Excel (archivo CSV) ----------
+function exportarCSV() {
+  const l = store.get('servicios', []).sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''));
+  if (!l.length) { alert('Todavía no hay servicios en la bitácora.'); return; }
+  const cols = [['Fecha', 'fecha'], ['Cliente', 'cliente'], ['Teléfono', 'tel'], ['Dirección', 'direccion'], ['Tipo', 'tipo'], ['Marca', 'marca'], ['Modelo', 'modelo'],
+    ['Capacidad', 'btu'], ['Gas', 'gas'], ['Baja', 'baja'], ['Alta', 'alta'], ['Amperes', 'amps'], ['Voltaje', 'volts'], ['SH', 'sh'], ['Notas', 'notas'], ['Próximo mantenimiento', 'proximo']];
+  const celda = v => `"${String(v ?? '').replace(/"/g, '""').replace(/\r?\n/g, ' ')}"`;
+  const filas = [[...cols.map(c => c[0]), 'Conceptos', 'Total'].map(celda).join(';'),
+    ...l.map(s => [...cols.map(c => s[c[1]]), (s.conceptos || []).map(c => `${c.d} ${c.p}`).join(' / '), String(totalServicio(s)).replace('.', ',')].map(celda).join(';'))];
+  const archivo = new File(['\ufeff' + filas.join('\r\n')], `refriguia-bitacora-${hoy()}.csv`, { type: 'text/csv' });
+  if (navigator.canShare?.({ files: [archivo] })) navigator.share({ files: [archivo], title: archivo.name }).catch(e => { if (e.name !== 'AbortError') descargar(archivo); });
+  else descargar(archivo);
 }

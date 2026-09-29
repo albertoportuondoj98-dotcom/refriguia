@@ -64,8 +64,12 @@ VISTAS.gas = id => {
         return `<tr><td>${fmt(tA(t, cfg.tu), 0)}</td><td class="num">${fmt(psiA(satP(g.id, t), cfg.pu), pDec(cfg.pu))}</td>${t2 != null
           ? `<td>${fmt(tA(t2, cfg.tu), 0)}</td><td class="num">${fmt(psiA(satP(g.id, t2), cfg.pu), pDec(cfg.pu))}</td>` : '<td></td><td></td>'}</tr>`; }).join('')
     }</table></div>
+    ${voz.disponible() ? `<button class="btn sec" id="escuchar">${ico('bell')} Escuchar la ficha</button>` : ''}
     <a class="btn" href="#pt" id="abrirPT">${ico('table')} Abrir la tabla P-T completa de ${g.nombre}</a>
     <a class="btn sec" href="#leccion/${g.leccion}">${ico('book-open')} Leer la lección</a>`;
   $('#abrirPT').onclick = () => { cfg.gas = g.id; saveCfg(); };
+  $('#escuchar')?.addEventListener('click', e => voz.leer(`${g.nombre}. ${g.quimico}. ${g.seguridadTxt}. ${g.usos} ${g.claves.join(' ')}`, e.currentTarget));
+  alSalir(() => voz.parar());
+
   return g.nombre;
 };

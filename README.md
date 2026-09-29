@@ -3,7 +3,7 @@
 App para técnico de aire acondicionado (ventana y minisplit hasta 3 TR; R22, R410A, R32 y R290).
 Funciona sin internet una vez instalada en el teléfono.
 
-## Qué trae (versión 3.0)
+## Qué trae (versión 3.1)
 - **Herramientas:** tabla P-T, sobrecalentamiento/subenfriamiento con SH objetivo (capilar),
   diagnóstico por presiones con temperaturas reales, ΔT de aire, carga por metro extra,
   capacitores, terminales C-S-R / U-V-W, sensores NTC, cable y breaker (MCA/MOP),
@@ -13,6 +13,8 @@ Funciona sin internet una vez instalada en el teléfono.
   pregunta del día y glosario inglés-español.
 - **Bitácora:** servicios con fotos, cobro por conceptos, lista de precios, nota y recordatorio
   por WhatsApp, historial por cliente, resumen del mes, borrador automático y respaldo con fotos.
+- **Consulta:** códigos de error de Midea, Gree y LG, diagramas (ciclo, capacitor doble, compresor, tubería), piezas con dibujo, 11 casos prácticos y refacciones.
+- **Extras:** manómetros dibujados en el diagnóstico, lecciones en voz alta, bitácora a Excel (CSV) y botón para mandar comentarios.
 - **Gases:** fichas de R22, R410A, R32 y R290 (datos, presiones, carga, aceite, seguridad, tabla P-T rápida), comparación y otros gases.
 - **Ajustes:** país (Cuba o México: WhatsApp, voltajes, clima), altitud (corrige las tablas P-T), tamaño de letra, tema, unidades y datos del técnico.
 

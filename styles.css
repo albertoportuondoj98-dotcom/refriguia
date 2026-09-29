@@ -309,3 +309,19 @@ summary { font-weight: 700; cursor: pointer; }
 
 .glosa { padding: 0.625rem 0.25rem; border-bottom: 1px solid var(--line); }
 mark { background: var(--warn-soft); color: inherit; padding: 0 0.125rem; border-radius: 0.25rem; }
+
+/* Diagramas, piezas, manómetros y códigos */
+.diagrama { width: 100%; height: auto; color: var(--text); margin: 0.25rem 0 0.5rem; }
+.diagrama .caja, .dib .caja, .mano .caja { fill: var(--surface-2); stroke: var(--muted); stroke-width: 2; }
+.diagrama .borne, .dib .borne { fill: var(--surface); stroke: var(--text); stroke-width: 2; }
+.diagrama .tx, .mano .tx { font: 700 13px system-ui, sans-serif; fill: var(--text); }
+.diagrama .tx2 { font: 600 11px system-ui, sans-serif; fill: var(--muted); }
+.mano .tx3 { font: 600 9px system-ui, sans-serif; fill: var(--muted); }
+.pieza { display: flex; gap: 0.875rem; align-items: center; }
+.dib { width: 4.5rem; height: 4.5rem; flex: none; color: var(--text); background: var(--surface-2); border-radius: 0.875rem; }
+.dib .tx2 { font: 700 12px system-ui, sans-serif; fill: var(--text); }
+.manos { display: flex; gap: 0.5rem; justify-content: center; margin: 0.75rem 0; }
+.mano { flex: 1; max-width: 11rem; margin: 0; text-align: center; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 0.5rem; box-shadow: var(--sombra); color: var(--text); }
+.mano svg { width: 100%; height: auto; }
+.codigo { display: flex; gap: 0.875rem; align-items: flex-start; }
+.codigo .cod { flex: none; min-width: 3.5rem; text-align: center; font-weight: 850; font-size: 1.125rem; padding: 0.375rem 0.5rem; border-radius: 0.625rem; background: var(--bad-soft); color: var(--bad); }

@@ -2,7 +2,7 @@
 // Las pantallas viven en herramientas.js, aprender.js y bitacora.js (se agregan a VISTAS).
 'use strict';
 
-const VERSION = '3.0';
+const VERSION = '3.1';
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const app = $('#app');
@@ -219,7 +219,7 @@ let limpiezas = [];
 const alSalir = fn => limpiezas.push(fn); // lo que hay que apagar al cambiar de pantalla
 
 const PADRE = {
-  lista: 'listas', falla: 'fallas', leccion: 'aprender', quiz: 'aprender', glosario: 'aprender',
+  lista: 'listas', falla: 'fallas', leccion: 'aprender', quiz: 'aprender', glosario: 'aprender', caso: 'casos',
   servicio: 'bitacora', editar: a => (a[0] && a[0] !== 'nuevo' ? 'servicio/' + a[0] : 'bitacora'),
   apuntes: 'bitacora', apunte: 'apuntes', precios: 'ajustes', gas: 'gases',
 };
@@ -227,7 +227,8 @@ const TAB_DE = {
   fallas: 'fallas', falla: 'fallas',
   aprender: 'aprender', leccion: 'aprender', quiz: 'aprender', glosario: 'aprender',
   bitacora: 'bitacora', servicio: 'bitacora', editar: 'bitacora', apuntes: 'bitacora', apunte: 'bitacora',
-  gases: 'gases', gas: 'gases',
+  gases: 'gases', gas: 'gases', codigos: 'fallas',
+  casos: 'aprender', caso: 'aprender', piezas: 'aprender', diagramas: 'aprender',
   buscar: '', ajustes: '', precios: '',
 };
 const RAICES = ['', 'gases', 'fallas', 'aprender', 'bitacora'];
@@ -310,12 +311,24 @@ VISTAS.ajustes = () => {
     <p class="muted">La bitácora, los apuntes y las fotos se guardan sólo en este teléfono. Guarda un respaldo de vez en cuando y mándatelo por WhatsApp o correo.</p>
     <label class="chk"><input type="checkbox" id="conFotos" checked><span>Incluir fotos (el archivo sale más grande)</span></label>
     <div class="row"><button class="btn sec" id="exp">${ico('download')} Guardar</button><button class="btn sec" id="imp">${ico('upload')} Cargar</button></div>
+    <button class="btn sec" id="csv">${ico('table')} Pasar la bitácora a Excel</button>
     <input type="file" id="archivo" accept=".json,application/json" class="hidden">
     <p class="muted" id="espacio"></p>
     <h2>Acerca de</h2>
     <p>RefriGuía versión ${VERSION}. Funciona sin internet.</p>
     <p class="muted">Tablas P-T calculadas con CoolProp. Los demás valores son orientativos: manda la placa y el manual del fabricante.</p>
-    <button class="btn sec" id="compartirApp">${ico('share-2')} Compartir la app con otro técnico</button>`;
+    <button class="btn sec" id="compartirApp">${ico('share-2')} Compartir la app con otro técnico</button>
+    <h2>¿Qué le mejorarías?</h2>
+    <p class="muted">Escribe qué te estorba, qué no se entiende o qué le falta, y mándalo por WhatsApp a quien te pasó la app.</p>
+    <textarea id="coment" placeholder="Ej. La tabla P-T la uso mucho, pero me gustaría…"></textarea>
+    <button class="btn" id="mandarComent">${ico('message-circle')} Mandar comentarios</button>`;
+  $('#csv').onclick = exportarCSV;
+  $('#mandarComent').onclick = () => {
+    const t = $('#coment').value.trim();
+    if (!t) { $('#coment').focus(); return; }
+    compartir(`Comentarios sobre RefriGuía ${VERSION}:\n\n${t}`);
+  };
+
 
   bindSeg('letra', v => { cfg.letra = v; saveCfg(); aplicaLetra(); });
   bindSeg('tema', v => { cfg.tema = v; saveCfg(); aplicaTema(); });
@@ -375,7 +388,10 @@ VISTAS.buscar = () => {
     if (ls.length) grupos.push(['Lecciones', ls.map(({ l, txt }) => item(`#leccion/${l.id}`, l.icono, 'morado', l.titulo, fragmento(txt, palabras)))]);
     const fs = FALLAS.map((f, i) => ({ f, i, txt: [f.t, ...f.causas, ...f.revisar].join('. ') })).filter(x => coincide(x.txt));
     if (fs.length) grupos.push(['Fallas', fs.map(({ f, i, txt }) => item(`#falla/${i}`, 'stethoscope', 'rojo', esc(f.t), fragmento(txt, palabras)))]);
-    const gs = GLOSARIO.filter(([en, es]) => coincide(en + ' ' + es)).slice(0, 12);
+    const cs = CODIGOS.flatMap(m => m.codigos.map(c => [m.marca, ...c])).filter(c => coincide(c.join(' '))).slice(0, 12);
+    if (cs.length) grupos.push(['Códigos de error', cs.map(([m, c, s]) => item('#codigos', 'triangle-alert', 'rojo', `${esc(m)} ${esc(c)}`, esc(s)))]);
+    const gs = GLOSARIO.filter(
+([en, es]) => coincide(en + ' ' + es)).slice(0, 12);
     if (gs.length) grupos.push(['Glosario', gs.map(([en, es]) => `<div class="glosa"><b>${esc(en)}</b><div>${esc(es)}</div></div>`)]);
     const as = store.get('apuntes', []).filter(a => coincide(a.titulo + ' ' + a.texto)).slice(0, 15);
     if (as.length) grupos.push(['Mis apuntes', as.map(a => item(`#apunte/${a.id}`, 'notebook-pen', 'ambar', esc(a.titulo || 'Sin título'), fragmento(a.texto || '', palabras)))]);

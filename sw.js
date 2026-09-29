@@ -1,8 +1,8 @@
 // Guarda toda la app en el teléfono para que funcione sin internet.
 // Al cambiar cualquier archivo, sube el número de versión: la app avisa "Hay una versión nueva".
-const CACHE = 'refriguia-v3';
+const CACHE = 'refriguia-v4';
 const ARCHIVOS = [
-  './', './index.html', './styles.css', './app.js', './herramientas.js', './aprender.js', './bitacora.js', './gases.js', './iconos.js',
+  './', './index.html', './styles.css', './app.js', './herramientas.js', './aprender.js', './bitacora.js', './gases.js', './iconos.js', './extras.js',
   './data.js', './pt.js', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png'
 ];
 
